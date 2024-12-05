@@ -1,0 +1,14 @@
+.navbar {
+    background-color: #404040; /* Slightly lighter gray for header */
+    color: #f0f0f0; /* Light gray text */
+    border-bottom: 2px solid #d4f1f4; /* Ice blue border */
+  }
+  
+  .nav-link {
+    color: #f0f0f0; /* Light gray links */
+  }
+  
+  .nav-link:hover {
+    color: #d4f1f4; /* Ice blue on hover */
+  }
+  

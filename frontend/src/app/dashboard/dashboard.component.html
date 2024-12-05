@@ -1,0 +1,26 @@
+<div class="container mt-4">
+  <h1 class="text-center mb-4">Dashboard</h1>
+  <p> Welcome {{userName()}}</p>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Today's Workout</h5>
+          <p class="card-text">
+            {{workouts[0].name}}    
+          </p>
+          <a href="#" class="btn btn-primary">Go.</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Mannage split</h5>
+          <p class="card-text">Plan your workout splits here.</p>
+          <a routerLink="/workout-split" class="btn btn-secondary">View Split</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
