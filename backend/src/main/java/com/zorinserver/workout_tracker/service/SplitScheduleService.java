@@ -1,5 +1,7 @@
 package com.zorinserver.workout_tracker.service;
 
+import com.zorinserver.workout_tracker.dto.ExerciseDayDTO;
+import com.zorinserver.workout_tracker.entity.Day;
 import com.zorinserver.workout_tracker.entity.SplitSchedule;
 import com.zorinserver.workout_tracker.repository.SplitScheduleRepository;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,18 @@ public class SplitScheduleService {
 
     public SplitScheduleService(SplitScheduleRepository splitScheduleRepository) {
         this.splitScheduleRepository = splitScheduleRepository;
+    }
+
+    public List<ExerciseDayDTO> getExercisesByDayIdAndSplitId(Long dayId, Long splitId) {
+        return splitScheduleRepository.findExercisesByDayIdAndSplitId(dayId, splitId);
+    }
+
+    public List<Day> getDaysWithWorkoutsBySplitId(Long splitId) {
+        return splitScheduleRepository.findDaysWithWorkoutsBySplitId(splitId);
+    }
+
+    public List<SplitSchedule> getAllSplitSchedules() {
+        return splitScheduleRepository.findAll();
     }
 
     public List<SplitSchedule> getSchedulesBySplitId(Long splitId) {

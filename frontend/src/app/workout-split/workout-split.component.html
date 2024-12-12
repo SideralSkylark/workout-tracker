@@ -1,11 +1,161 @@
-<div class="container mt-4">
-    <h1 class="text-center mb-4">Workout Splits</h1>
-    <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Split</h5>
-          <p class="card-text">Track your progress and log your reps here.</p>
-          <a class="btn btn-primary">Go.</a>
+<div class="container text-light mt-4">
+  <h2>Workout Split</h2>
+  <hr />
+  <div *ngIf="isLoading" class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <div *ngIf="splits.length > 0; else noSplits">
+    <div class="card bg-dark mb-3" *ngFor="let split of splits">
+      <div class="card-body white-text">
+        <h5 class="card-title">{{ split.name }}</h5>
+        <button 
+          class="btn btn-danger" 
+          (click)="deleteSplit(split.id)"
+        >
+          Delete Split
+        </button>
+      </div>
+    </div>
+    <div *ngIf="daysToExercise.length > 0; else noExercises">
+      <div class="card bg-dark mb-3" *ngFor="let entry of daysToExercise">
+        <div class="card-body white-text">
+          <h5 class="card-title">{{ entry.day }}</h5>
+          <ul>
+            <li *ngFor="let exercise of entry.exercises">
+              <strong>{{ exercise.exerciseName }}</strong> - 
+              {{ exercise.sets }} sets of {{ exercise.reps }} reps
+            </li>
+          </ul>
         </div>
-    </div>        
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noExercises>
+    <div class="alert alert-warning">
+      No Workouts found, create some to add them to your split!
+    </div>
+  </ng-template>
+
+  <ng-template #noSplits>
+    <div class="alert alert-warning">
+      No workout splits available. Add a split to get started!
+    </div>
+    <div class="card bg-dark mb-3 input-form">
+      <div>
+        <input 
+          type="text" 
+          class="form-control mb-2" 
+          [(ngModel)]="newSplitName" 
+          placeholder="Enter split name" 
+        />
+        <button 
+          class="btn btn-primary mb-3" 
+          (click)="createSplit()"
+        >
+          Add Split
+        </button>
+      </div>
+    </div>
+  </ng-template>
+  <!-- Floating Button -->
+  <button
+    class="btn btn-primary rounded-circle position-fixed"
+    style="bottom: 20px; right: 360px; width: 60px; height: 60px; font-size: 24px;"
+    (click)="openExerciseModal()"
+  >
+    +
+  </button>
+
+  <!-- Modal for Adding Exercise -->
+  <div
+    class="modal fade"
+    id="addExerciseModal"
+    tabindex="-1"
+    aria-labelledby="addExerciseModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addExerciseModalLabel">Add Exercise</h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <input 
+              type = "hidden"
+              id = "splitId"
+              class="form-control"
+              [(ngModel)]="newExercise.splitId"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="exerciseName" class="form-label">Exercise Name</label>
+            <input
+              type="text"
+              id="exerciseName"
+              class="form-control"
+              [(ngModel)]="newExercise.exerciseName"
+              placeholder="Enter exercise name"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="sets" class="form-label">Sets</label>
+            <input
+              type="number"
+              id="sets"
+              class="form-control"
+              [(ngModel)]="newExercise.sets"
+              placeholder="Enter number of sets"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="reps" class="form-label">Reps</label>
+            <input
+              type="number"
+              id="reps"
+              class="form-control"
+              [(ngModel)]="newExercise.reps"
+              placeholder="Enter number of reps"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="day" class="form-label">Day</label>
+            <select
+              id="day"
+              class="form-select"
+              [(ngModel)]="newExercise.dayId"
+            >
+              <option *ngFor="let day of days" [value]="day.id">
+                {{ day.name }}
+              </option>
+            </select>
+          </div>
+          
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="addExercise()"
+          >
+            Add Exercise
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-  

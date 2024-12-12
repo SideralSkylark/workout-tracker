@@ -15,4 +15,10 @@ export const routes: Routes = [
       return import('./workout-split/workout-split.component').then(m => m.WorkoutSplitComponent);
     },
   },
+  {
+    path: 'log-workout',
+    loadComponent: () => {
+      return import('./log-workout/log-workout.component').then(m => m.LogWorkoutComponent);
+    },
+  },
 ];

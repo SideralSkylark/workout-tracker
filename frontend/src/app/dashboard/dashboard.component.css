@@ -1,0 +1,12 @@
+.white-text {
+  color: white;
+}
+
+.btn-outline-black {
+    color: #000000;
+    border-color: #5ec2f2;
+  }
+  .btn-outline-iceblue:hover {
+    background-color: #5ec2f2;
+    color: #fff;
+  }

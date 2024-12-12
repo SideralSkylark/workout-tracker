@@ -1,26 +1,62 @@
-<div class="container mt-4">
-  <h1 class="text-center mb-4">Dashboard</h1>
-  <p> Welcome {{userName()}}</p>
-  <div class="row">
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Today's Workout</h5>
-          <p class="card-text">
-            {{workouts[0].name}}    
-          </p>
-          <a href="#" class="btn btn-primary">Go.</a>
-        </div>
-      </div>
+<div class="container text-light mt-4">
+  <h2>Dashboard</h2>
+  <hr />
+
+  <!-- Next Workout Card -->
+  <div class="card bg-dark mb-3">
+    <div class="card-body white-text">
+      <h5 class="card-title">Next Workout</h5>
+      <p *ngIf="nextWorkout; else noWorkout">
+        Scheduled for: <strong>{{ nextWorkout.name }}</strong>
+      </p>
+      <ng-template #noWorkout>
+        <p>No workout scheduled for today.</p>
+      </ng-template>
+      <button
+        class="btn btn-primary mt-3"
+        [disabled]="!nextWorkout"
+        
+      >
+        Start Workout
+      </button>
     </div>
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Mannage split</h5>
-          <p class="card-text">Plan your workout splits here.</p>
-          <a routerLink="/workout-split" class="btn btn-secondary">View Split</a>
-        </div>
-      </div>
+  </div>
+
+  <!-- Weekly Progress Card -->
+  <div class="card bg-dark mb-3">
+    <div class="card-body white-text">
+      <h5 class="card-title">Weekly Progress</h5>
+      <p>
+        Workouts Completed:
+        <strong>{{ weeklyProgress?.completed }}</strong>/<strong>{{ weeklyProgress?.target }}</strong>
+      </p>
+      <button
+        class="btn btn-secondary mt-3"
+        
+      >
+        View Detailed Progress
+      </button>
+    </div>
+  </div>
+
+  <!-- Recent Activity Card -->
+  <div class="card bg-dark">
+    <div class="card-body white-text">
+      <h5 class="card-title">Recent Activity</h5>
+      <ul class="list-group list-group-flush">
+        <li
+          class="list-group-item bg-dark text-light"
+          *ngFor="let log of recentActivity"
+        >
+          <strong>{{ log.workout_date }}</strong>: {{ log.notes }}
+        </li>
+      </ul>
+      <button
+        class="btn btn-outline-light mt-3"
+        
+      >
+        View All Activity
+      </button>
     </div>
   </div>
 </div>

@@ -23,6 +23,11 @@ public class WorkoutLogController {
         this.workoutLogService = workoutLogService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<WorkoutLog>> getAllWorkoutLogs() {
+        return ResponseEntity.ok(workoutLogService.getAllWorkoutLogs());
+    }
+
     @GetMapping("/{date}")
     public ResponseEntity<List<WorkoutLog>> getLogsByDate(@PathVariable String date) {
         return ResponseEntity.ok(workoutLogService.getLogsByDate(LocalDate.parse(date)));

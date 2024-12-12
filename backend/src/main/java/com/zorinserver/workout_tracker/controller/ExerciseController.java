@@ -2,6 +2,7 @@ package com.zorinserver.workout_tracker.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zorinserver.workout_tracker.dto.AddExerciseRequest;
 import com.zorinserver.workout_tracker.entity.Exercise;
 import com.zorinserver.workout_tracker.service.ExerciseService;
 
@@ -37,6 +39,12 @@ public class ExerciseController {
     @PostMapping
     public ResponseEntity<Exercise> createExercise(@RequestBody Exercise exercise) {
         return ResponseEntity.ok(exerciseService.createExercise(exercise));
+    }
+
+    @PostMapping("/addExercise")
+    public ResponseEntity<Exercise> addExercise(@RequestBody AddExerciseRequest request) {
+        Exercise exercise = exerciseService.addExercise(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(exercise);
     }
 
     @PutMapping("/{id}")

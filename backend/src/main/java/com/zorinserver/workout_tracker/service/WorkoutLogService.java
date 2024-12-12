@@ -15,6 +15,10 @@ public class WorkoutLogService {
         this.workoutLogRepository = workoutLogRepository;
     }
 
+    public List<WorkoutLog> getAllWorkoutLogs() {
+        return workoutLogRepository.findAll();
+    }
+
     public List<WorkoutLog> getLogsByDate(LocalDate date) {
         return workoutLogRepository.findByWorkoutDate(date);
     }

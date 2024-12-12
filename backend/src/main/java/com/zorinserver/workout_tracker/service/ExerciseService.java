@@ -1,7 +1,19 @@
 package com.zorinserver.workout_tracker.service;
 
+import com.zorinserver.workout_tracker.dto.AddExerciseRequest;
+import com.zorinserver.workout_tracker.entity.Day;
 import com.zorinserver.workout_tracker.entity.Exercise;
+import com.zorinserver.workout_tracker.entity.Split;
+import com.zorinserver.workout_tracker.entity.SplitExercise;
+import com.zorinserver.workout_tracker.entity.SplitSchedule;
+import com.zorinserver.workout_tracker.repository.DayRepository;
 import com.zorinserver.workout_tracker.repository.ExerciseRepository;
+import com.zorinserver.workout_tracker.repository.SplitExerciseRepository;
+import com.zorinserver.workout_tracker.repository.SplitRepository;
+import com.zorinserver.workout_tracker.repository.SplitScheduleRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,9 +21,22 @@ import java.util.List;
 @Service
 public class ExerciseService {
     private final ExerciseRepository exerciseRepository;
+    private final DayRepository dayRepository;
+    private final SplitRepository splitRepository;
+    private final SplitExerciseRepository splitExerciseRepository;
+    private final SplitScheduleRepository splitScheduleRepository;
 
-    public ExerciseService(ExerciseRepository exerciseRepository) {
+    public ExerciseService(
+        ExerciseRepository exerciseRepository,
+        DayRepository dayRepository,
+        SplitRepository splitRepository,
+        SplitExerciseRepository splitExerciseRepository,
+        SplitScheduleRepository splitScheduleRepository) {
         this.exerciseRepository = exerciseRepository;
+        this.dayRepository = dayRepository;
+        this.splitRepository = splitRepository;
+        this.splitExerciseRepository = splitExerciseRepository;
+        this.splitScheduleRepository = splitScheduleRepository;
     }
 
     public List<Exercise> getAllExercises() {
@@ -24,6 +49,39 @@ public class ExerciseService {
 
     public Exercise createExercise(Exercise exercise) {
         return exerciseRepository.save(exercise);
+    }
+
+    @Transactional
+    public Exercise addExercise(AddExerciseRequest request) {
+        // Fetch related entities
+        // Fetch related entities or throw exceptions if not found
+        Day day = dayRepository.findById(request.getDayId())
+        .orElseThrow(() -> new RuntimeException("Day not found with ID: " + request.getDayId()));
+
+        Split split = splitRepository.findById(request.getSplitId())
+        .orElseThrow(() -> new RuntimeException("Split now found with ID: " + request.getSplitId()));
+
+        // Create Exercise
+        Exercise exercise = new Exercise();
+        exercise.setName(request.getExerciseName());
+        exerciseRepository.save(exercise);
+
+        // Create SplitExercise
+        SplitExercise splitExercise = new SplitExercise();
+        splitExercise.setExercise(exercise);
+        splitExercise.setSplit(split);
+        splitExercise.setSets(request.getSets());
+        splitExercise.setReps(request.getReps());
+        splitExerciseRepository.save(splitExercise);
+
+        // Create SplitSchedule
+        SplitSchedule splitSchedule = new SplitSchedule();
+        splitSchedule.setDay(day);
+        splitSchedule.setExercise(exercise);
+        splitSchedule.setSplit(split);
+        splitScheduleRepository.save(splitSchedule);
+
+        return exercise;
     }
 
     public Exercise updateExercise(Long id, Exercise updatedExercise) {

@@ -3,6 +3,8 @@ package com.zorinserver.workout_tracker.entity;
 import jakarta.persistence.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Day {
     @Id
@@ -12,6 +14,7 @@ public class Day {
     private String name;
 
     @OneToMany(mappedBy = "day", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<SplitSchedule> splitSchedules;
 
     // Getters and Setters

@@ -3,6 +3,8 @@ package com.zorinserver.workout_tracker.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class WorkoutLog {
     @Id
@@ -14,10 +16,12 @@ public class WorkoutLog {
 
     @ManyToOne
     @JoinColumn(name = "split_id", nullable = false)
+    @JsonIgnore
     private Split split;
 
     @ManyToOne
     @JoinColumn(name = "exercise_id", nullable = false)
+    @JsonIgnore
     private Exercise exercise;
 
     @Column(name = "completed_sets")

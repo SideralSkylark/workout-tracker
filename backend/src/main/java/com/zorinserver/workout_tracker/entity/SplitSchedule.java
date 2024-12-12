@@ -1,5 +1,7 @@
 package com.zorinserver.workout_tracker.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -10,6 +12,7 @@ public class SplitSchedule {
 
     @ManyToOne
     @JoinColumn(name = "split_id", nullable = false)
+    @JsonIgnore
     private Split split;
 
     @ManyToOne
@@ -18,6 +21,7 @@ public class SplitSchedule {
 
     @ManyToOne
     @JoinColumn(name = "exercise_id", nullable = false)
+    @JsonIgnore
     private Exercise exercise;
 
     // Getters and Setters
