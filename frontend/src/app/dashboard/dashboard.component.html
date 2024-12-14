@@ -15,7 +15,7 @@
       <button
         class="btn btn-primary mt-3"
         [disabled]="!nextWorkout"
-        
+        routerLink="/log-workout"
       >
         Start Workout
       </button>
@@ -46,9 +46,10 @@
       <ul class="list-group list-group-flush">
         <li
           class="list-group-item bg-dark text-light"
-          *ngFor="let log of recentActivity"
+          *ngFor="let logs of recentActivity"
         >
-          <strong>{{ log.workout_date }}</strong>: {{ log.notes }}
+          <strong>Workout Date: {{ logs.workoutDate }}</strong>;
+          Completed reps: {{ logs.completedReps }}
         </li>
       </ul>
       <button

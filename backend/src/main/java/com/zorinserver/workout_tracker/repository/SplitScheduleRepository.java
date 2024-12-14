@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface SplitScheduleRepository extends JpaRepository<SplitSchedule, Long> {
     
-    @Query("SELECT new com.zorinserver.workout_tracker.dto.ExerciseDayDTO(e.name, se.sets, se.reps, d.name) " +
+    @Query("SELECT new com.zorinserver.workout_tracker.dto.ExerciseDayDTO(e.id, e.name, se.sets, se.reps, d.name) " +
        "FROM SplitSchedule ss " +
        "JOIN ss.split s " +
        "JOIN ss.day d " +
@@ -19,6 +19,7 @@ public interface SplitScheduleRepository extends JpaRepository<SplitSchedule, Lo
        "JOIN SplitExercise se ON se.split = ss.split AND se.exercise = ss.exercise " +
        "WHERE d.id = :dayId AND s.id = :splitId")
     List<ExerciseDayDTO> findExercisesByDayIdAndSplitId(@Param("dayId") Long dayId, @Param("splitId") Long splitId);
+
 
     @Query("SELECT DISTINCT s.day FROM SplitSchedule s WHERE s.split.id = :splitId")
     List<Day> findDaysWithWorkoutsBySplitId(@Param("splitId") Long splitId);

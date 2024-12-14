@@ -4,13 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.zorinserver.workout_tracker.dto.WorkoutLogWithSetsDTO;
 import com.zorinserver.workout_tracker.entity.WorkoutLog;
 import com.zorinserver.workout_tracker.service.WorkoutLogService;
 
@@ -18,7 +14,7 @@ import com.zorinserver.workout_tracker.service.WorkoutLogService;
 @RequestMapping("/api/workout-logs")
 public class WorkoutLogController {
     private final WorkoutLogService workoutLogService;
-    
+
     public WorkoutLogController(WorkoutLogService workoutLogService) {
         this.workoutLogService = workoutLogService;
     }
@@ -33,8 +29,11 @@ public class WorkoutLogController {
         return ResponseEntity.ok(workoutLogService.getLogsByDate(LocalDate.parse(date)));
     }
 
-    @PostMapping
-    public ResponseEntity<WorkoutLog> createWorkoutLog(@RequestBody WorkoutLog workoutLog) {
-        return ResponseEntity.ok(workoutLogService.createWorkoutLog(workoutLog));
+    @PostMapping("/log-workout")
+    public ResponseEntity<?> logWorkouts(@RequestBody List<WorkoutLogWithSetsDTO> workoutLogDTOs) {
+        System.out.println(workoutLogDTOs.get(0).getWorkoutSets().toString());
+        System.out.println(workoutLogDTOs.get(0).getExerciseId());
+        workoutLogDTOs.forEach(dto -> workoutLogService.createWorkoutLogFromDTO(dto));
+        return ResponseEntity.ok("Workout logs saved successfully");
     }
 }

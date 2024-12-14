@@ -117,6 +117,7 @@ export class WorkoutSplitComponent {
             this.daysToExercise.push({
               day: day.name,
               exercises: exercises.map((exercise) => ({
+                id: exercise.id,
                 exerciseName: exercise.exerciseName,
                 sets: exercise.sets,
                 reps: exercise.reps
@@ -125,6 +126,7 @@ export class WorkoutSplitComponent {
           }
         });
         console.log("Days to Exercise:", this.daysToExercise);
+        console.log(this.exercises);
       },
       error: (error) => {
         console.error("Error loading exercises:", error);

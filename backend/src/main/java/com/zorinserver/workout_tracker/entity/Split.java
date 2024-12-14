@@ -21,6 +21,11 @@ public class Split {
     @JsonIgnore
     private List<SplitExercise> splitExercises;
 
+    public Split() {}
+
+    public Split(Long id) {
+        this.id = id;
+    }
     // Getters and Setters
     public Long getId() {
         return id;

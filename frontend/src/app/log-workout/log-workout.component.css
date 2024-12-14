@@ -1,0 +1,30 @@
+.form-control {
+    background-color: #000000;
+    color: #ffffff;
+    border: 1px solid #444;
+  }
+  
+  .form-control::placeholder {
+    color: white;
+  }
+
+  /* For buttons inside the input fields */
+  .form-control::-webkit-inner-spin-button,
+  .form-control::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  .form-control:focus {
+    box-shadow: none;
+    border-color: #007bff;
+  }
+
+.white-text {
+    color: white;
+}
+
+.submit-btn {
+    margin-bottom: 20px;
+}
+  

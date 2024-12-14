@@ -17,6 +17,12 @@ public class Exercise {
     @JsonIgnore
     private List<SplitExercise> splitExercises;
 
+    public Exercise() {}
+
+    public Exercise(Long id) {
+        this.id = id;
+    }
+
     // Getters and Setters
     public Long getId() {
         return id;

@@ -2,6 +2,7 @@ package com.zorinserver.workout_tracker.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -31,6 +32,9 @@ public class WorkoutLog {
     private int completedReps;
 
     private String notes;
+
+    @OneToMany(mappedBy = "workoutLog", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WorkoutSet> workoutSets;
 
     // Getters and Setters
     public Long getId() {
@@ -87,5 +91,13 @@ public class WorkoutLog {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public List<WorkoutSet> getWorkoutSets() {
+        return workoutSets;
+    }
+    
+    public void setWorkoutSets(List<WorkoutSet> workoutSets) {
+        this.workoutSets = workoutSets;
     }
 }
