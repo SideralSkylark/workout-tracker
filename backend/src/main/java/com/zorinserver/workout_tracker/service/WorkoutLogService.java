@@ -63,7 +63,7 @@ public class WorkoutLogService {
             WorkoutSet set = new WorkoutSet();
             set.setSetNumber(setDTO.getSetNumber());
             set.setCompletedReps(setDTO.getCompletedReps());
-            set.setWorkoutLog(workoutLog); // Link to WorkoutLog
+            set.setWorkoutLog(workoutLog); 
             return set;
         }).collect(Collectors.toList());
 

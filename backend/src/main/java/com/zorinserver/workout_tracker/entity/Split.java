@@ -21,12 +21,16 @@ public class Split {
     @JsonIgnore
     private List<SplitExercise> splitExercises;
 
+    @OneToMany(mappedBy = "split", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<SplitSchedule> splitSchedules;
+
+    @OneToMany(mappedBy = "split", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<WorkoutLog> workoutLogs;
+
     public Split() {}
 
-    public Split(Long id) {
-        this.id = id;
-    }
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -57,5 +61,21 @@ public class Split {
 
     public void setSplitExercises(List<SplitExercise> splitExercises) {
         this.splitExercises = splitExercises;
+    }
+
+    public List<SplitSchedule> getSplitSchedules() {
+        return splitSchedules;
+    }
+
+    public void setSplitSchedules(List<SplitSchedule> splitSchedules) {
+        this.splitSchedules = splitSchedules;
+    }
+
+    public List<WorkoutLog> getWorkoutLogs() {
+        return workoutLogs;
+    }
+
+    public void setWorkoutLogs(List<WorkoutLog> workoutLogs) {
+        this.workoutLogs = workoutLogs;
     }
 }

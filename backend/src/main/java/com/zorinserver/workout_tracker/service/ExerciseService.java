@@ -11,7 +11,9 @@ import com.zorinserver.workout_tracker.repository.ExerciseRepository;
 import com.zorinserver.workout_tracker.repository.SplitExerciseRepository;
 import com.zorinserver.workout_tracker.repository.SplitRepository;
 import com.zorinserver.workout_tracker.repository.SplitScheduleRepository;
+import com.zorinserver.workout_tracker.repository.WorkoutLogRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
@@ -25,18 +27,21 @@ public class ExerciseService {
     private final SplitRepository splitRepository;
     private final SplitExerciseRepository splitExerciseRepository;
     private final SplitScheduleRepository splitScheduleRepository;
+    private final WorkoutLogRepository workoutLogRepository;
 
     public ExerciseService(
         ExerciseRepository exerciseRepository,
         DayRepository dayRepository,
         SplitRepository splitRepository,
         SplitExerciseRepository splitExerciseRepository,
-        SplitScheduleRepository splitScheduleRepository) {
+        SplitScheduleRepository splitScheduleRepository,
+        WorkoutLogRepository workoutLogRepository) {
         this.exerciseRepository = exerciseRepository;
         this.dayRepository = dayRepository;
         this.splitRepository = splitRepository;
         this.splitExerciseRepository = splitExerciseRepository;
         this.splitScheduleRepository = splitScheduleRepository;
+        this.workoutLogRepository = workoutLogRepository;
     }
 
     public List<Exercise> getAllExercises() {
@@ -53,20 +58,16 @@ public class ExerciseService {
 
     @Transactional
     public Exercise addExercise(AddExerciseRequest request) {
-        // Fetch related entities
-        // Fetch related entities or throw exceptions if not found
         Day day = dayRepository.findById(request.getDayId())
         .orElseThrow(() -> new RuntimeException("Day not found with ID: " + request.getDayId()));
 
         Split split = splitRepository.findById(request.getSplitId())
         .orElseThrow(() -> new RuntimeException("Split now found with ID: " + request.getSplitId()));
 
-        // Create Exercise
         Exercise exercise = new Exercise();
         exercise.setName(request.getExerciseName());
         exerciseRepository.save(exercise);
 
-        // Create SplitExercise
         SplitExercise splitExercise = new SplitExercise();
         splitExercise.setExercise(exercise);
         splitExercise.setSplit(split);
@@ -74,7 +75,6 @@ public class ExerciseService {
         splitExercise.setReps(request.getReps());
         splitExerciseRepository.save(splitExercise);
 
-        // Create SplitSchedule
         SplitSchedule splitSchedule = new SplitSchedule();
         splitSchedule.setDay(day);
         splitSchedule.setExercise(exercise);
@@ -90,7 +90,17 @@ public class ExerciseService {
         return exerciseRepository.save(exercise);
     }
 
-    public void deleteExercise(Long id) {
-        exerciseRepository.deleteById(id);
+    @Transactional
+    public void deleteExercise(Long exerciseId) {
+        Exercise exercise = exerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new EntityNotFoundException("Exercise not found with id: " + exerciseId));
+
+        // Check if the exercise is referenced in any WorkoutLog
+        if (workoutLogRepository.existsByExercise(exercise)) {
+            throw new IllegalStateException("Cannot delete exercise as it is referenced in WorkoutLogs");
+        }
+
+        // Perform the deletion
+        exerciseRepository.delete(exercise);
     }
 }

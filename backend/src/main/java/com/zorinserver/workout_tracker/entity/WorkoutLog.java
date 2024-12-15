@@ -36,7 +36,6 @@ public class WorkoutLog {
     @OneToMany(mappedBy = "workoutLog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkoutSet> workoutSets;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -96,7 +95,7 @@ public class WorkoutLog {
     public List<WorkoutSet> getWorkoutSets() {
         return workoutSets;
     }
-    
+
     public void setWorkoutSets(List<WorkoutSet> workoutSets) {
         this.workoutSets = workoutSets;
     }

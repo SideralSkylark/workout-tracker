@@ -24,7 +24,6 @@ public class SplitSchedule {
     @JsonIgnore
     private Exercise exercise;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

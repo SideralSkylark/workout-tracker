@@ -1,73 +1,102 @@
 <div class="container text-light mt-4">
-  <h2>Workout Split</h2>
-  <hr />
-  <div *ngIf="isLoading" class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading...</span>
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold fs-3">Workout Split</h2>
+    <p class="text-secondary fs-6">
+      Plan and organize your workouts effectively by defining splits and exercises.
+    </p>
   </div>
+  <hr />
+
+  <div *ngIf="isLoading" class="d-flex justify-content-center mt-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
   <div *ngIf="splits.length > 0; else noSplits">
-    <div class="card bg-dark mb-3" *ngFor="let split of splits">
-      <div class="card-body white-text">
-        <h5 class="card-title">{{ split.name }}</h5>
-        <button 
-          class="btn btn-danger" 
-          (click)="deleteSplit(split.id)"
-        >
-          Delete Split
-        </button>
+    <h3 class="fw-semibold fs-5 mb-3">Your Workout Splits</h3>
+    <div class="row">
+      <div class="col-md-100 mb-3" *ngFor="let split of splits">
+        <div class="card bg-dark shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-uppercase fw-semibold white-text">{{ split.name }}</h5>
+            <button
+              class="btn btn-danger btn-sm mt-2 w-100"
+              (click)="deleteSplit(split.id)"
+            >
+              <i class="bi bi-trash me-2"></i>Delete Split
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-    <div *ngIf="daysToExercise.length > 0; else noExercises">
-      <div class="card bg-dark mb-3" *ngFor="let entry of daysToExercise">
-        <div class="card-body white-text">
-          <h5 class="card-title">{{ entry.day }}</h5>
-          <ul>
-            <li *ngFor="let exercise of entry.exercises">
-              <strong>{{ exercise.exerciseName }}</strong> - 
-              {{ exercise.sets }} sets of {{ exercise.reps }} reps
-            </li>
-          </ul>
+
+    <div *ngIf="daysToExercise.length > 0; else noExercises" class="mt-4">
+      <h3 class="fw-semibold fs-5 mb-3">Exercises by Day</h3>
+      <div class="row">
+        <div class="col-md-6 mb-3" *ngFor="let entry of daysToExercise">
+          <div class="card bg-dark shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title text-uppercase fw-semibold white-text">{{ entry.day }}</h5>
+              <ul class="list-group list-group-flush mt-3">
+                <li
+                  *ngFor="let exercise of entry.exercises"
+                  class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    <strong>{{ exercise.exerciseName }}</strong>
+                    <br />
+                    {{ exercise.sets }} sets of {{ exercise.reps }} reps
+                  </div>
+                  <button 
+                  class="btn btn-danger btn-sm"
+                  (click)="deleteExercise(exercise.id)">
+                    X
+                  </button>
+                </li>
+              </ul>              
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <ng-template #noExercises>
-    <div class="alert alert-warning">
-      No Workouts found, create some to add them to your split!
-    </div>
-  </ng-template>
-
   <ng-template #noSplits>
-    <div class="alert alert-warning">
-      No workout splits available. Add a split to get started!
-    </div>
-    <div class="card bg-dark mb-3 input-form">
-      <div>
-        <input 
-          type="text" 
-          class="form-control mb-2" 
-          [(ngModel)]="newSplitName" 
-          placeholder="Enter split name" 
+    <div class="alert alert-warning text-center mt-4">
+      <p>No workout splits available. Start by adding one below!</p>
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="newSplitName"
+          placeholder="Enter split name"
         />
-        <button 
-          class="btn btn-primary mb-3" 
-          (click)="createSplit()"
-        >
+        <button class="btn btn-primary" (click)="createSplit()">
           Add Split
         </button>
       </div>
     </div>
   </ng-template>
-  <!-- Floating Button -->
+
+  <ng-template #noExercises>
+    <div class="alert alert-warning text-center mt-4">
+      <p>No exercises found. Use the floating button to add some!</p>
+    </div>
+  </ng-template>
+
   <button
-    class="btn btn-primary rounded-circle position-fixed"
-    style="bottom: 20px; right: 360px; width: 60px; height: 60px; font-size: 24px;"
+    class="btn btn-primary rounded-circle position-fixed shadow white-text"
+    style="bottom: 20px; right: 20px; width: 60px; height: 60px; font-size: 24px;"
     (click)="openExerciseModal()"
+    title="Add Exercise"
   >
-    +
+  +
+    <i class="bi bi-plus"></i>
   </button>
 
-  <!-- Modal for Adding Exercise -->
+
   <div
     class="modal fade"
     id="addExerciseModal"
@@ -88,14 +117,6 @@
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <input 
-              type = "hidden"
-              id = "splitId"
-              class="form-control"
-              [(ngModel)]="newExercise.splitId"
-            />
-          </div>
-          <div class="mb-3">
             <label for="exerciseName" class="form-label">Exercise Name</label>
             <input
               type="text"
@@ -105,27 +126,29 @@
               placeholder="Enter exercise name"
             />
           </div>
-          <div class="mb-3">
-            <label for="sets" class="form-label">Sets</label>
-            <input
-              type="number"
-              id="sets"
-              class="form-control"
-              [(ngModel)]="newExercise.sets"
-              placeholder="Enter number of sets"
-            />
+          <div class="row">
+            <div class="col-md-6">
+              <label for="sets" class="form-label">Sets</label>
+              <input
+                type="number"
+                id="sets"
+                class="form-control"
+                [(ngModel)]="newExercise.sets"
+                placeholder="Enter number of sets"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="reps" class="form-label">Reps</label>
+              <input
+                type="number"
+                id="reps"
+                class="form-control"
+                [(ngModel)]="newExercise.reps"
+                placeholder="Enter number of reps"
+              />
+            </div>
           </div>
-          <div class="mb-3">
-            <label for="reps" class="form-label">Reps</label>
-            <input
-              type="number"
-              id="reps"
-              class="form-control"
-              [(ngModel)]="newExercise.reps"
-              placeholder="Enter number of reps"
-            />
-          </div>
-          <div class="mb-3">
+          <div class="mt-3">
             <label for="day" class="form-label">Day</label>
             <select
               id="day"
@@ -137,7 +160,6 @@
               </option>
             </select>
           </div>
-          
         </div>
         <div class="modal-footer">
           <button

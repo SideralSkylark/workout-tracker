@@ -21,7 +21,6 @@ public class WorkoutSet {
     @Column(name = "completed_reps", nullable = false)
     private int completedReps;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

@@ -20,10 +20,8 @@ public interface SplitScheduleRepository extends JpaRepository<SplitSchedule, Lo
        "WHERE d.id = :dayId AND s.id = :splitId")
     List<ExerciseDayDTO> findExercisesByDayIdAndSplitId(@Param("dayId") Long dayId, @Param("splitId") Long splitId);
 
-
     @Query("SELECT DISTINCT s.day FROM SplitSchedule s WHERE s.split.id = :splitId")
     List<Day> findDaysWithWorkoutsBySplitId(@Param("splitId") Long splitId);
-
 
     List<SplitSchedule> findBySplitId(Long splitId);
     List<SplitSchedule> findByDayId(Long dayId);

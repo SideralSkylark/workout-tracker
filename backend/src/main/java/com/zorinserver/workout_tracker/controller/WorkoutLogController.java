@@ -31,8 +31,6 @@ public class WorkoutLogController {
 
     @PostMapping("/log-workout")
     public ResponseEntity<?> logWorkouts(@RequestBody List<WorkoutLogWithSetsDTO> workoutLogDTOs) {
-        System.out.println(workoutLogDTOs.get(0).getWorkoutSets().toString());
-        System.out.println(workoutLogDTOs.get(0).getExerciseId());
         workoutLogDTOs.forEach(dto -> workoutLogService.createWorkoutLogFromDTO(dto));
         return ResponseEntity.ok("Workout logs saved successfully");
     }

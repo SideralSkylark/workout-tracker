@@ -17,13 +17,12 @@ public class Exercise {
     @JsonIgnore
     private List<SplitExercise> splitExercises;
 
+    @OneToMany(mappedBy = "exercise", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<WorkoutLog> workoutLogs;
+
     public Exercise() {}
 
-    public Exercise(Long id) {
-        this.id = id;
-    }
-
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -47,4 +46,12 @@ public class Exercise {
     public void setSplitExercises(List<SplitExercise> splitExercises) {
         this.splitExercises = splitExercises;
     }
-} 
+
+    public List<WorkoutLog> getWorkoutLogs() {
+        return workoutLogs;
+    }
+
+    public void setWorkoutLogs(List<WorkoutLog> workoutLogs) {
+        this.workoutLogs = workoutLogs;
+    }
+}

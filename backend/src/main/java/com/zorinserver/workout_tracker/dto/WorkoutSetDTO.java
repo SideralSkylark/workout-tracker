@@ -4,8 +4,6 @@ public class WorkoutSetDTO {
     private int setNumber;
     private int completedReps;
 
-    // Getters and setters
-
     public int getSetNumber() {
         return setNumber;
     }

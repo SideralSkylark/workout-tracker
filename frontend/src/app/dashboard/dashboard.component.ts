@@ -4,7 +4,6 @@ import { WorkoutService } from '../services/workout.service';
 import { CommonModule } from '@angular/common';
 import { DayService } from '../services/day.service';
 import { Observable, forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,9 +13,10 @@ import { map } from 'rxjs/operators';
   standalone: true
 })
 export class DashboardComponent implements OnInit {
-  split: any[] = [];
+  splits: any[] = [];
   daysToWorkout: any[] = [];
   nextWorkout: any = null;
+  isWorkoutToday: boolean = false;
   isLoading: boolean = true;
   weeklyProgress: any = null;
   recentActivity: any = null;
@@ -28,10 +28,10 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadDashboardData();
+    this.initializeDashboard();
   }
 
-  private loadDashboardData(): void {
+  private initializeDashboard(): void {
     this.isLoading = true;
 
     forkJoin({
@@ -39,64 +39,69 @@ export class DashboardComponent implements OnInit {
       logs: this.workoutService.getWorkoutLogs()
     }).subscribe({
       next: ({ splits, logs }) => {
-        this.split = splits;
+        this.splits = splits;
         this.weeklyProgress = this.calculateWeeklyProgress(logs);
         this.recentActivity = logs.slice(0, 5);
 
-        if (this.split.length > 0) {
-          this.loadNextWorkout(this.split[0].id);
+        if (this.splits.length > 0) {
+          this.loadNextWorkout(this.splits[0].id);
         }
 
         this.isLoading = false;
       },
-      error: (error) => {
-        console.error('Error loading dashboard data:', error);
-        this.isLoading = false;
-      }
+      error: (error) => this.handleError('Error loading dashboard data', error)
     });
-  }
-
-  private getTodayId(): number {
-    const today = new Date().getDay();
-    return today === 0 ? 7 : today;
   }
 
   private loadNextWorkout(splitId: number): void {
-    this.getDaysToWorkout(splitId).subscribe({
-      next: (daysWithWorkouts: any[]) => {
+    this.getWorkoutDays(splitId).subscribe({
+      next: (days: any[]) => {
         const todayId = this.getTodayId();
-        const sortedDays = daysWithWorkouts.sort((a: any, b: any) => a.id - b.id);
-        const nextWorkoutDay = sortedDays.find(day => day.id >= todayId) || sortedDays[0];
+        const sortedDays = days.sort((a: any, b: any) => a.id - b.id);
+        const upcomingWorkout = sortedDays.find(day => day.id === todayId);
 
-        this.nextWorkout = nextWorkoutDay;
+        this.nextWorkout = upcomingWorkout || null;
+        this.isWorkoutToday = Boolean(this.nextWorkout);
       },
-      error: (error) => {
-        console.error('Error fetching workout days:', error);
-      }
+      error: (error) => this.handleError('Error fetching workout days', error)
     });
   }
 
-  private getDaysToWorkout(splitId: number): Observable<any> {
+  private getWorkoutDays(splitId: number): Observable<any> {
     return this.dayService.getDaysWithWorkouts(splitId);
   }
 
   private calculateWeeklyProgress(logs: any[]): any {
     const weeklyTarget = 5;
-    const completedWorkouts = logs.filter(log => this.isThisWeek(log.workout_date));
+    const completedWorkouts = logs.filter(log => this.isThisWeek(new Date(log.workout_date)));
     return {
       completed: completedWorkouts.length,
       target: weeklyTarget
     };
   }
 
-  private isThisWeek(date: string): boolean {
+  private isThisWeek(date: Date): boolean {
     const now = new Date();
-    const logDate = new Date(date);
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
+    const startOfWeek = this.getStartOfWeek(now);
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-    return logDate >= startOfWeek && logDate <= endOfWeek;
+    return date >= startOfWeek && date <= endOfWeek;
+  }
+
+  private getTodayId(): number {
+    const today = new Date().getDay();
+    return today === 0 ? 7 : today; 
+  }
+
+  private getStartOfWeek(date: Date): Date {
+    const start = new Date(date);
+    start.setDate(date.getDate() - date.getDay() + 1); 
+    return start;
+  }
+
+  private handleError(message: string, error: any): void {
+    console.error(message, error);
+    this.isLoading = false;
   }
 }

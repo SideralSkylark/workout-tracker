@@ -1,12 +1,30 @@
-.white-text {
-  color: white;
+/* General Enhancements */
+.container {
+  font-family: 'Roboto', sans-serif; /* Use a modern, clean font */
 }
 
-.btn-outline-black {
-    color: #000000;
-    border-color: #5ec2f2;
-  }
-  .btn-outline-iceblue:hover {
-    background-color: #5ec2f2;
-    color: #fff;
-  }
+.card {
+  border-radius: 0.75rem;
+}
+
+.card-title {
+  letter-spacing: 0.05rem;
+}
+
+.progress-bar span {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.btn {
+  font-size: 0.95rem;
+}
+
+/* Dark Mode Adjustments */
+.text-light {
+  color: #f8f9fa !important;
+}
+
+.text-secondary {
+  color: #adb5bd !important;
+}

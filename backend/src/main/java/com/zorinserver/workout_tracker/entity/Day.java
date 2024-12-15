@@ -17,7 +17,6 @@ public class Day {
     @JsonIgnore
     private List<SplitSchedule> splitSchedules;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
