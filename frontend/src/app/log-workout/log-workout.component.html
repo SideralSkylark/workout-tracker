@@ -1,49 +1,55 @@
 <div class="container text-light mt-4">
-    <h2>Log Today's Workout</h2>
-    <hr />
-  
-    <!-- Loading Spinner -->
-    <div *ngIf="isLoading" class="spinner-border text-primary" role="status">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold fs-3">Log Today's Workout</h2>
+  </div>
+  <hr />
+
+  <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
       <span class="visually-hidden">Loading...</span>
     </div>
-  
-    <!-- Exercises to Log -->
-    <div *ngIf="exercises.length > 0; else noWorkout">
-      <form (ngSubmit)="onSubmit()">
-        <div class="card bg-dark mb-3" *ngFor="let exercise of exercises; let i = index">
-          <div class="card-body white-text">
-            <h5 class="card-title">{{ exercise.name }}</h5>
-            <p class="card-text">
-              Planned: {{ exercise.sets }} sets of {{ exercise.reps }} reps per set
-            </p>
-  
-            <div *ngFor="let set of [].constructor(exercise.sets); let setIndex = index" class="row mb-2">
-              <div class="col-md-12">
-                <label for="reps-{{ i }}-{{ setIndex }}" class="form-label">
-                  Set {{ setIndex + 1 }} Reps Completed
-                </label>
-                <input
-                  type="number"
-                  id="reps-{{ i }}-{{ setIndex }}"
-                  class="form-control"
-                  [(ngModel)]="exercise.loggedReps[setIndex]"
-                  name="loggedReps-{{ i }}-{{ setIndex }}"
-                  placeholder="Enter reps completed for set {{ setIndex + 1 }}"
-                  required
-                />
-              </div>
+  </div>
+
+  <div *ngIf="exercises.length > 0; else noWorkout" class="mt-4">
+    <form (ngSubmit)="onSubmit()">
+      <div class="card bg-dark mb-4 shadow-sm text-light" *ngFor="let exercise of exercises; let i = index">
+        <div class="card-body">
+          <h5 class="card-title mb-3">{{ exercise.name }}</h5>
+          <p class="card-text">
+            Planned: <strong>{{ exercise.sets }}</strong> sets of <strong>{{ exercise.reps }}</strong> reps per set
+          </p>
+          <hr />
+
+          <div class="mb-3" *ngFor="let set of [].constructor(exercise.sets); let setIndex = index">
+            <label for="reps-{{ i }}-{{ setIndex }}" class="form-label d-block">
+              <span>Set {{ setIndex + 1 }} Reps Completed</span>
+            </label>
+            <div class="input-group">
+              <input
+                type="number"
+                id="reps-{{ i }}-{{ setIndex }}"
+                class="form-control"
+                [(ngModel)]="exercise.loggedReps[setIndex]"
+                name="loggedReps-{{ i }}-{{ setIndex }}"
+                placeholder="Enter reps for set {{ setIndex + 1 }}"
+                required
+              />
+              <span class="input-group-text">Reps</span>
             </div>
           </div>
         </div>
-        <button type="submit" class="btn btn-primary mt-3 submit-btn">Log Workout</button>
-      </form>
-    </div>
-  
-    <!-- No Workout Message -->
-    <ng-template #noWorkout>
-      <div class="alert alert-warning">
-        No workouts scheduled for today! Enjoy your rest day.
       </div>
-    </ng-template>
+
+      <button type="submit" class="btn btn-primary w-100 py-2 mt-3 shadow-sm submit-btn">
+        Log Workout
+      </button>
+    </form>
   </div>
-  
+
+  <ng-template #noWorkout>
+    <div class="alert alert-warning text-center py-4 shadow-sm mt-5">
+      <strong>No workouts scheduled for today!</strong>
+      <p class="mb-0">Enjoy your rest day. See you tomorrow!</p>
+    </div>
+  </ng-template>
+</div>

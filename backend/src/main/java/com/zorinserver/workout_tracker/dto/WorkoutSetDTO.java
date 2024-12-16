@@ -1,6 +1,7 @@
 package com.zorinserver.workout_tracker.dto;
 
 public class WorkoutSetDTO {
+    private Long id;
     private int setNumber;
     private int completedReps;
 

@@ -3,7 +3,11 @@ package com.zorinserver.workout_tracker.repository;
 import com.zorinserver.workout_tracker.dto.ExerciseDayDTO;
 import com.zorinserver.workout_tracker.entity.Day;
 import com.zorinserver.workout_tracker.entity.SplitSchedule;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -22,6 +26,12 @@ public interface SplitScheduleRepository extends JpaRepository<SplitSchedule, Lo
 
     @Query("SELECT DISTINCT s.day FROM SplitSchedule s WHERE s.split.id = :splitId")
     List<Day> findDaysWithWorkoutsBySplitId(@Param("splitId") Long splitId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM SplitSchedule s WHERE s.exercise.id = :exerciseId")
+    void deleteByExerciseId(@Param("exerciseId") Long exerciseId);
+
 
     List<SplitSchedule> findBySplitId(Long splitId);
     List<SplitSchedule> findByDayId(Long dayId);

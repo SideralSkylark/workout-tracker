@@ -10,7 +10,7 @@ import { Observable, forkJoin } from 'rxjs';
   imports: [RouterLink, CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
-  standalone: true
+  standalone: true,
 })
 export class DashboardComponent implements OnInit {
   splits: any[] = [];
@@ -36,12 +36,12 @@ export class DashboardComponent implements OnInit {
 
     forkJoin({
       splits: this.workoutService.getWorkoutSplits(),
-      logs: this.workoutService.getWorkoutLogs()
+      logs: this.workoutService.getWorkoutLogs(),
     }).subscribe({
       next: ({ splits, logs }) => {
         this.splits = splits;
         this.weeklyProgress = this.calculateWeeklyProgress(logs);
-        this.recentActivity = logs.slice(0, 5);
+        this.loadRecentActivity(logs);
 
         if (this.splits.length > 0) {
           this.loadNextWorkout(this.splits[0].id);
@@ -49,8 +49,19 @@ export class DashboardComponent implements OnInit {
 
         this.isLoading = false;
       },
-      error: (error) => this.handleError('Error loading dashboard data', error)
+      error: (error) => this.handleError('Error loading dashboard data', error),
     });
+  }
+
+  /**
+   * Loads the most recent activity logs sorted by date.
+   * @param logs - List of all workout logs.
+   */
+  private loadRecentActivity(logs: any[]): void {
+    const sortedLogs = logs.sort(
+      (a, b) => new Date(b.workoutDate).getTime() - new Date(a.workoutDate).getTime()
+    );
+    this.recentActivity = sortedLogs.slice(0, 5);
   }
 
   private loadNextWorkout(splitId: number): void {
@@ -58,12 +69,12 @@ export class DashboardComponent implements OnInit {
       next: (days: any[]) => {
         const todayId = this.getTodayId();
         const sortedDays = days.sort((a: any, b: any) => a.id - b.id);
-        const upcomingWorkout = sortedDays.find(day => day.id === todayId);
+        const upcomingWorkout = sortedDays.find((day) => day.id === todayId);
 
         this.nextWorkout = upcomingWorkout || null;
         this.isWorkoutToday = Boolean(this.nextWorkout);
       },
-      error: (error) => this.handleError('Error fetching workout days', error)
+      error: (error) => this.handleError('Error fetching workout days', error),
     });
   }
 
@@ -73,10 +84,12 @@ export class DashboardComponent implements OnInit {
 
   private calculateWeeklyProgress(logs: any[]): any {
     const weeklyTarget = 5;
-    const completedWorkouts = logs.filter(log => this.isThisWeek(new Date(log.workout_date)));
+    const completedWorkouts = logs.filter((log) =>
+      this.isThisWeek(new Date(log.workout_date))
+    );
     return {
       completed: completedWorkouts.length,
-      target: weeklyTarget
+      target: weeklyTarget,
     };
   }
 
@@ -91,12 +104,12 @@ export class DashboardComponent implements OnInit {
 
   private getTodayId(): number {
     const today = new Date().getDay();
-    return today === 0 ? 7 : today; 
+    return today === 0 ? 7 : today;
   }
 
   private getStartOfWeek(date: Date): Date {
     const start = new Date(date);
-    start.setDate(date.getDate() - date.getDay() + 1); 
+    start.setDate(date.getDate() - date.getDay() + 1);
     return start;
   }
 

@@ -13,7 +13,6 @@ import com.zorinserver.workout_tracker.repository.SplitRepository;
 import com.zorinserver.workout_tracker.repository.SplitScheduleRepository;
 import com.zorinserver.workout_tracker.repository.WorkoutLogRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
@@ -27,7 +26,6 @@ public class ExerciseService {
     private final SplitRepository splitRepository;
     private final SplitExerciseRepository splitExerciseRepository;
     private final SplitScheduleRepository splitScheduleRepository;
-    private final WorkoutLogRepository workoutLogRepository;
 
     public ExerciseService(
         ExerciseRepository exerciseRepository,
@@ -41,7 +39,6 @@ public class ExerciseService {
         this.splitRepository = splitRepository;
         this.splitExerciseRepository = splitExerciseRepository;
         this.splitScheduleRepository = splitScheduleRepository;
-        this.workoutLogRepository = workoutLogRepository;
     }
 
     public List<Exercise> getAllExercises() {
@@ -92,15 +89,8 @@ public class ExerciseService {
 
     @Transactional
     public void deleteExercise(Long exerciseId) {
-        Exercise exercise = exerciseRepository.findById(exerciseId)
-                .orElseThrow(() -> new EntityNotFoundException("Exercise not found with id: " + exerciseId));
+        splitScheduleRepository.deleteByExerciseId(exerciseId);
 
-        // Check if the exercise is referenced in any WorkoutLog
-        if (workoutLogRepository.existsByExercise(exercise)) {
-            throw new IllegalStateException("Cannot delete exercise as it is referenced in WorkoutLogs");
-        }
-
-        // Perform the deletion
-        exerciseRepository.delete(exercise);
+        exerciseRepository.deleteById(exerciseId);
     }
 }
