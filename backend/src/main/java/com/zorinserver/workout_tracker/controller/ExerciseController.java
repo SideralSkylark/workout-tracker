@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zorinserver.workout_tracker.dto.AddExerciseRequest;
-import com.zorinserver.workout_tracker.entity.Exercise;
+import com.zorinserver.workout_tracker.dto.ExerciseDTO;
 import com.zorinserver.workout_tracker.service.ExerciseService;
 
 @RestController
@@ -27,29 +27,29 @@ public class ExerciseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Exercise>> getAllExercises() {
+    public ResponseEntity<List<ExerciseDTO>> getAllExercises() {
         return ResponseEntity.ok(exerciseService.getAllExercises());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Exercise> getExerciseById(@PathVariable Long id) {
+    public ResponseEntity<ExerciseDTO> getExerciseById(@PathVariable Long id) {
         return ResponseEntity.ok(exerciseService.getExerciseById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Exercise> createExercise(@RequestBody Exercise exercise) {
+    public ResponseEntity<ExerciseDTO> createExercise(@RequestBody ExerciseDTO exercise) {
         return ResponseEntity.ok(exerciseService.createExercise(exercise));
     }
-
+// diferent dto
     @PostMapping("/addExercise")
-    public ResponseEntity<Exercise> addExercise(@RequestBody AddExerciseRequest request) {
-        Exercise exercise = exerciseService.addExercise(request);
+    public ResponseEntity<ExerciseDTO> addExercise(@RequestBody AddExerciseRequest request) {
+        ExerciseDTO exercise = exerciseService.addExercise(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(exercise);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Exercise> updateExercise(@PathVariable Long id, @RequestBody Exercise exercise) {
-        return ResponseEntity.ok(exerciseService.updateExercise(id, exercise));
+    public ResponseEntity<ExerciseDTO> updateExercise(@PathVariable Long id, @RequestBody ExerciseDTO exerciseDTO) {
+        return ResponseEntity.ok(exerciseService.updateExercise(id, exerciseDTO));
     }
 
     @DeleteMapping("/{id}")

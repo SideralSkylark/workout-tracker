@@ -54,8 +54,7 @@ export class DashboardComponent implements OnInit {
   }
 
   /**
-   * Loads the most recent activity logs sorted by date.
-   * @param logs - List of all workout logs.
+   * @param logs 
    */
   private loadRecentActivity(logs: any[]): void {
     const sortedLogs = logs.sort(

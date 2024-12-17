@@ -1,11 +1,18 @@
 package com.zorinserver.workout_tracker.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class Day {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,28 +23,4 @@ public class Day {
     @OneToMany(mappedBy = "day", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<SplitSchedule> splitSchedules;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<SplitSchedule> getSplitSchedules() {
-        return splitSchedules;
-    }
-
-    public void setSplitSchedules(List<SplitSchedule> splitSchedules) {
-        this.splitSchedules = splitSchedules;
-    }
 }

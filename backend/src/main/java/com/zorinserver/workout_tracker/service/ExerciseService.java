@@ -1,11 +1,13 @@
 package com.zorinserver.workout_tracker.service;
 
 import com.zorinserver.workout_tracker.dto.AddExerciseRequest;
+import com.zorinserver.workout_tracker.dto.ExerciseDTO;
 import com.zorinserver.workout_tracker.entity.Day;
 import com.zorinserver.workout_tracker.entity.Exercise;
 import com.zorinserver.workout_tracker.entity.Split;
 import com.zorinserver.workout_tracker.entity.SplitExercise;
 import com.zorinserver.workout_tracker.entity.SplitSchedule;
+import com.zorinserver.workout_tracker.mapper.ExerciseMapper;
 import com.zorinserver.workout_tracker.repository.DayRepository;
 import com.zorinserver.workout_tracker.repository.ExerciseRepository;
 import com.zorinserver.workout_tracker.repository.SplitExerciseRepository;
@@ -18,6 +20,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ExerciseService {
@@ -41,20 +45,26 @@ public class ExerciseService {
         this.splitScheduleRepository = splitScheduleRepository;
     }
 
-    public List<Exercise> getAllExercises() {
-        return exerciseRepository.findAll();
+    public List<ExerciseDTO> getAllExercises() {
+        return exerciseRepository.findAll()
+                .stream()
+                .map(ExerciseMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public Exercise getExerciseById(Long id) {
-        return exerciseRepository.findById(id).orElseThrow(() -> new RuntimeException("Exercise not found"));
+    public ExerciseDTO getExerciseById(Long id) {
+        Optional<Exercise> exercise = exerciseRepository.findById(id);
+        return exercise.map(ExerciseMapper::toDTO).orElse(null);
     }
 
-    public Exercise createExercise(Exercise exercise) {
-        return exerciseRepository.save(exercise);
+    public ExerciseDTO createExercise(ExerciseDTO exerciseDTO) {
+        Exercise exercise = ExerciseMapper.toEntity(exerciseDTO);
+        Exercise savedExercise = exerciseRepository.save(exercise);
+        return ExerciseMapper.toDTO(savedExercise);
     }
 
     @Transactional
-    public Exercise addExercise(AddExerciseRequest request) {
+    public ExerciseDTO addExercise(AddExerciseRequest request) {
         Day day = dayRepository.findById(request.getDayId())
         .orElseThrow(() -> new RuntimeException("Day not found with ID: " + request.getDayId()));
 
@@ -63,7 +73,7 @@ public class ExerciseService {
 
         Exercise exercise = new Exercise();
         exercise.setName(request.getExerciseName());
-        exerciseRepository.save(exercise);
+        Exercise savedExercise = exerciseRepository.save(exercise);
 
         SplitExercise splitExercise = new SplitExercise();
         splitExercise.setExercise(exercise);
@@ -78,19 +88,26 @@ public class ExerciseService {
         splitSchedule.setSplit(split);
         splitScheduleRepository.save(splitSchedule);
 
-        return exercise;
+        return ExerciseMapper.toDTO(savedExercise);
     }
 
-    public Exercise updateExercise(Long id, Exercise updatedExercise) {
-        Exercise exercise = getExerciseById(id);
-        exercise.setName(updatedExercise.getName());
-        return exerciseRepository.save(exercise);
+    public ExerciseDTO updateExercise(Long id, ExerciseDTO exerciseDTO) {
+        Optional<Exercise> existingExercise = exerciseRepository.findById(id);
+
+        if (existingExercise.isPresent()) {
+            Exercise exercise = existingExercise.get();
+            exercise.setName(exerciseDTO.getName());
+            Exercise updatedExercise = exerciseRepository.save(exercise);
+            return ExerciseMapper.toDTO(updatedExercise);
+        }
+        return null;
     }
 
     @Transactional
     public void deleteExercise(Long exerciseId) {
-        splitScheduleRepository.deleteByExerciseId(exerciseId);
-
-        exerciseRepository.deleteById(exerciseId);
+        if (exerciseRepository.existsById(exerciseId)) {
+            exerciseRepository.deleteById(exerciseId);
+            splitScheduleRepository.deleteByExerciseId(exerciseId);
+        }
     }
 }

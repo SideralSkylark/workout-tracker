@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zorinserver.workout_tracker.dto.DayDTO;
 import com.zorinserver.workout_tracker.dto.ExerciseDayDTO;
-import com.zorinserver.workout_tracker.entity.Day;
 import com.zorinserver.workout_tracker.entity.SplitSchedule;
 import com.zorinserver.workout_tracker.service.SplitScheduleService;
 
@@ -31,8 +31,8 @@ public class SplitScheduleController {
     }
 
     @GetMapping("/days-with-workouts/{splitId}")
-    public ResponseEntity<List<Day>> getDaysWithWorkouts(@PathVariable Long splitId) {
-        List<Day> daysWithWorkouts = splitScheduleService.getDaysWithWorkoutsBySplitId(splitId);
+    public ResponseEntity<List<DayDTO>> getDaysWithWorkouts(@PathVariable Long splitId) {
+        List<DayDTO> daysWithWorkouts = splitScheduleService.getDaysWithWorkoutsBySplitId(splitId);
         return ResponseEntity.ok(daysWithWorkouts);
     }
 
