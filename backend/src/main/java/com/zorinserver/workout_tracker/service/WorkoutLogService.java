@@ -58,6 +58,8 @@ public class WorkoutLogService {
         workoutLog.setWorkoutDate(dto.getWorkoutDate());
         workoutLog.setExercise(exercise);
         workoutLog.setSplit(split);
+        workoutLog.setCompletedSets(dto.getCompletedSets());
+        workoutLog.setCompletedReps(dto.getCompletedReps());
 
         List<WorkoutSet> workoutSets = dto.getWorkoutSets().stream().map(setDTO -> {
             WorkoutSet set = new WorkoutSet();

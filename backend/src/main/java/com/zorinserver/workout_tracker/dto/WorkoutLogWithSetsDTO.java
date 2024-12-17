@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class WorkoutLogWithSetsDTO {
     private LocalDate workoutDate;
+    private int completedSets;
+    private int completedReps;
     private Long exerciseId;
     private Long splitId;
     private List<WorkoutSetDTO> workoutSets;
