@@ -2,7 +2,6 @@ package com.zorinserver.workout_tracker.service;
 
 import com.zorinserver.workout_tracker.dto.DayDTO;
 import com.zorinserver.workout_tracker.dto.ExerciseDayDTO;
-import com.zorinserver.workout_tracker.entity.Day;
 import com.zorinserver.workout_tracker.entity.SplitSchedule;
 import com.zorinserver.workout_tracker.mapper.DayMapper;
 import com.zorinserver.workout_tracker.repository.SplitScheduleRepository;

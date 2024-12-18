@@ -1,5 +1,4 @@
 <div class="container text-light mt-4">
-  <!-- Header Section -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold fs-3">Workout Split</h2>
     <p class="text-secondary fs-6">
@@ -15,14 +14,14 @@
   </div>
 
   <div *ngIf="splits.length > 0; else noSplits">
-    <h3 class="fw-semibold fs-5 mb-3">Your Workout Splits</h3>
+    <h3 class="fw-semibold fs-5 mb-3 mt-4">Your Workout Split</h3>
     <div class="row">
       <div class="col-md-100 mb-3" *ngFor="let split of splits">
         <div class="card bg-dark shadow-sm">
           <div class="card-body">
             <h5 class="card-title text-uppercase fw-semibold white-text">{{ split.name }}</h5>
             <button
-              class="btn btn-danger btn-sm mt-2 w-100"
+              class="btn btn-danger btn-sm w-100 mt-4 py-2"
               (click)="deleteSplit(split.id)"
             >
               <i class="bi bi-trash me-2"></i>Delete Split
@@ -52,7 +51,7 @@
                   <button 
                   class="btn btn-danger btn-sm"
                   (click)="deleteExercise(exercise.id)">
-                    X
+                  <i class="bi bi-trash"></i>
                   </button>
                 </li>
               </ul>              
@@ -92,7 +91,6 @@
     (click)="openExerciseModal()"
     title="Add Exercise"
   >
-  +
     <i class="bi bi-plus"></i>
   </button>
 

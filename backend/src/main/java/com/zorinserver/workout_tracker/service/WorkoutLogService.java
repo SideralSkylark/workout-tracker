@@ -11,6 +11,7 @@ import com.zorinserver.workout_tracker.repository.WorkoutLogRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,14 @@ public class WorkoutLogService {
         return workoutLogRepository.findByWorkoutDate(date);
     }
 
+    public boolean logsExistForDate(LocalDate date) {
+        return workoutLogRepository.existsByWorkoutDate(date);
+    }
+
+    public List<WorkoutLog> getLogsForDateRange(LocalDate startDate, LocalDate endDate) {
+        return workoutLogRepository.findByWorkoutDateBetween(startDate, endDate);
+    }    
+
     public WorkoutLog saveWorkoutLogWithSets(WorkoutLog workoutLog, List<WorkoutSet> sets) {
         Exercise exercise = exerciseRepository.findById(workoutLog.getExercise().getId())
             .orElseThrow(() -> new IllegalArgumentException("Invalid exercise ID"));
@@ -48,27 +57,34 @@ public class WorkoutLogService {
         return workoutLogRepository.save(workoutLog);
     }
 
-    public WorkoutLog createWorkoutLogFromDTO(WorkoutLogWithSetsDTO dto) {
-        Exercise exercise = exerciseRepository.findById(dto.getExerciseId())
-            .orElseThrow(() -> new IllegalArgumentException("Invalid exercise ID"));
-        Split split = splitRepository.findById(dto.getSplitId())
-            .orElseThrow(() -> new IllegalArgumentException("Split not found"));
+    public List<WorkoutLog> createWorkoutLogsFromDTOs(List<WorkoutLogWithSetsDTO> dtos) {
+        List<WorkoutLog> savedLogs = new ArrayList<>();
 
-        WorkoutLog workoutLog = new WorkoutLog();
-        workoutLog.setWorkoutDate(dto.getWorkoutDate());
-        workoutLog.setExercise(exercise);
-        workoutLog.setSplit(split);
-        workoutLog.setCompletedSets(dto.getCompletedSets());
-        workoutLog.setCompletedReps(dto.getCompletedReps());
+        for (WorkoutLogWithSetsDTO dto : dtos) {
+            Exercise exercise = exerciseRepository.findById(dto.getExerciseId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid exercise ID: " + dto.getExerciseId()));
+            Split split = splitRepository.findById(dto.getSplitId())
+                .orElseThrow(() -> new IllegalArgumentException("Split not found: " + dto.getSplitId()));
 
-        List<WorkoutSet> workoutSets = dto.getWorkoutSets().stream().map(setDTO -> {
-            WorkoutSet set = new WorkoutSet();
-            set.setSetNumber(setDTO.getSetNumber());
-            set.setCompletedReps(setDTO.getCompletedReps());
-            set.setWorkoutLog(workoutLog); 
-            return set;
-        }).collect(Collectors.toList());
+            WorkoutLog workoutLog = new WorkoutLog();
+            workoutLog.setWorkoutDate(dto.getWorkoutDate());
+            workoutLog.setExercise(exercise);
+            workoutLog.setSplit(split);
+            workoutLog.setCompletedSets(dto.getCompletedSets());
+            workoutLog.setCompletedReps(dto.getCompletedReps());
 
-        return saveWorkoutLogWithSets(workoutLog, workoutSets);
+            List<WorkoutSet> workoutSets = dto.getWorkoutSets().stream().map(setDTO -> {
+                WorkoutSet set = new WorkoutSet();
+                set.setSetNumber(setDTO.getSetNumber());
+                set.setCompletedReps(setDTO.getCompletedReps());
+                set.setWorkoutLog(workoutLog);
+                return set;
+            }).collect(Collectors.toList());
+
+            WorkoutLog savedLog = saveWorkoutLogWithSets(workoutLog, workoutSets);
+            savedLogs.add(savedLog);
+        }
+
+        return savedLogs;
     }
 }

@@ -4,10 +4,11 @@ import { CommonModule } from '@angular/common';
 import { ExerciseService } from '../services/exercise.service';
 import { FormsModule } from '@angular/forms';
 import { LogService } from '../services/log.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-log-workout',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './log-workout.component.html',
   styleUrl: './log-workout.component.css'
 })
@@ -16,6 +17,7 @@ export class LogWorkoutComponent {
   split: any[] = [];
   splitId: any = 0 || null;
   exercises: any[] = [];
+  logsExist: boolean = false;
 
   constructor(
     private workoutService: WorkoutService,
@@ -23,7 +25,7 @@ export class LogWorkoutComponent {
     private logService: LogService) {}
 
   ngOnInit(): void {
-    this.loadSplitAndWorkout();
+    this.checkIfLogsExistForToday();
   }
 
   private getTodayId(): number {
@@ -31,11 +33,24 @@ export class LogWorkoutComponent {
     return today === 0 ? 7 : today;
   }
 
+  private checkIfLogsExistForToday(): void {
+    const todayDate = new Date().toISOString().split('T')[0];
+    this.logService.checkLogsForDate(todayDate).subscribe({
+      next: (logsExist: boolean) => {
+        this.logsExist = logsExist;
+        this.loadSplitAndWorkout();
+      },
+      error: (error) => {
+        console.error('Error checking logs for today:', error);
+        this.isLoading = false;
+      },
+    });
+  }
+
   private loadSplitAndWorkout(): void {
     this.workoutService.getWorkoutSplits().subscribe((splits) => {
       this.splitId = splits[0].id;
       this.loadTodayWorkout();
-      console.log(this.splitId);
       this.isLoading = false;
     });
   }
@@ -69,10 +84,10 @@ export class LogWorkoutComponent {
     console.log('Payload being sent:', workoutLogs);
     
     this.logService.logWorkouts(workoutLogs).subscribe({
-      next: (response) => {
-        console.log('Workout logged successfully:', response);
+      next: (savedLogs: any[]) => {
+        console.log('Workout logged successfully:', savedLogs);
         alert('Workout logged successfully!');
-        this.exercises = []; // Clear form after submission
+        this.exercises = [];
       },
       error: (error) => {
         console.error('Error logging workout:', error);

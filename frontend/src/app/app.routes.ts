@@ -21,4 +21,10 @@ export const routes: Routes = [
       return import('./log-workout/log-workout.component').then(m => m.LogWorkoutComponent);
     },
   },
+  {
+    path: 'progress',
+    loadComponent: () => {
+      return import('./progress/progress.component').then(m => m.ProgressComponent);
+    },
+  }
 ];

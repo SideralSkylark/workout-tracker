@@ -3,7 +3,8 @@ import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../services/workout.service';
 import { CommonModule } from '@angular/common';
 import { DayService } from '../services/day.service';
-import { Observable, forkJoin } from 'rxjs';
+import { LogService } from '../services/log.service';
+import { lastValueFrom, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,102 +19,118 @@ export class DashboardComponent implements OnInit {
   nextWorkout: any = null;
   isWorkoutToday: boolean = false;
   isLoading: boolean = true;
+  workoutLogged: boolean = false;
   weeklyProgress: any = null;
   recentActivity: any = null;
   userName = signal('Sidik');
 
   constructor(
     private workoutService: WorkoutService,
-    private dayService: DayService
+    private dayService: DayService,
+    private logService: LogService
   ) {}
 
-  ngOnInit(): void {
-    this.initializeDashboard();
-  }
-
-  private initializeDashboard(): void {
+  async ngOnInit(): Promise<void> {
     this.isLoading = true;
 
-    forkJoin({
-      splits: this.workoutService.getWorkoutSplits(),
-      logs: this.workoutService.getWorkoutLogs(),
-    }).subscribe({
-      next: ({ splits, logs }) => {
-        this.splits = splits;
-        this.weeklyProgress = this.calculateWeeklyProgress(logs);
-        this.loadRecentActivity(logs);
+    try {
+      // Load all data simultaneously
+      const [logsExist, splits, weeklyLogs] = await Promise.all([
+        this.checkIfLogsExistForToday(),
+        this.loadWorkoutSplits(),
+        this.loadWeeklyLogs(),
+      ]);
 
-        if (this.splits.length > 0) {
-          this.loadNextWorkout(this.splits[0].id);
-        }
+      this.workoutLogged = logsExist;
+      this.splits = splits;
+      this.recentActivity = this.getRecentActivity(weeklyLogs);
 
-        this.isLoading = false;
-      },
-      error: (error) => this.handleError('Error loading dashboard data', error),
-    });
+      if (this.splits.length > 0) {
+        await this.loadNextWorkout(this.splits[0].id);
+      }
+
+      this.weeklyProgress = this.calculateWeeklyProgress(weeklyLogs);
+    } catch (error) {
+      this.handleError('Error loading dashboard', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
-  /**
-   * @param logs 
-   */
-  private loadRecentActivity(logs: any[]): void {
-    const sortedLogs = logs.sort(
-      (a, b) => new Date(b.workoutDate).getTime() - new Date(a.workoutDate).getTime()
-    );
-    this.recentActivity = sortedLogs.slice(0, 5);
+  private async loadWorkoutSplits(): Promise<any[]> {
+    return lastValueFrom(this.workoutService.getWorkoutSplits());
   }
 
-  private loadNextWorkout(splitId: number): void {
-    this.getWorkoutDays(splitId).subscribe({
-      next: (days: any[]) => {
-        const todayId = this.getTodayId();
-        const sortedDays = days.sort((a: any, b: any) => a.id - b.id);
-        const upcomingWorkout = sortedDays.find((day) => day.id === todayId);
-
-        this.nextWorkout = upcomingWorkout || null;
-        this.isWorkoutToday = Boolean(this.nextWorkout);
-      },
-      error: (error) => this.handleError('Error fetching workout days', error),
-    });
+  private async loadWeeklyLogs(): Promise<any[]> {
+    return lastValueFrom(this.logService.getLogsForCurrentWeek());
   }
+
+  private async checkIfLogsExistForToday(): Promise<boolean> {
+    const todayDate = new Date().toISOString().split('T')[0];
+    try {
+      return await lastValueFrom(this.logService.checkLogsForDate(todayDate));
+    } catch (error) {
+      console.error('Error checking logs for today:', error);
+      return false;
+    }
+  }
+
+  private async loadNextWorkout(splitId: number): Promise<void> {
+    try {
+      const days: any[] = await lastValueFrom(this.getWorkoutDays(splitId)); // Assuming `days` is an array of objects
+      const todayId = this.getTodayId();
+      const sortedDays = days.sort((a: any, b: any) => a.id - b.id);
+  
+      this.daysToWorkout = sortedDays;
+      this.nextWorkout = sortedDays.find((day: any) => day.id === todayId) || null; // Explicitly type `day`
+      this.isWorkoutToday = Boolean(this.nextWorkout);
+    } catch (error) {
+      this.handleError('Error fetching workout days', error);
+    }
+  }  
 
   private getWorkoutDays(splitId: number): Observable<any> {
     return this.dayService.getDaysWithWorkouts(splitId);
   }
 
+  private getRecentActivity(logs: any[]): any[] {
+    return logs
+      .filter((log) => log.workoutDate)
+      .sort(
+        (a, b) =>
+          new Date(b.workoutDate).getTime() - new Date(a.workoutDate).getTime()
+      )
+      .slice(0, 5);
+  }
+
   private calculateWeeklyProgress(logs: any[]): any {
-    const weeklyTarget = 5;
-    const completedWorkouts = logs.filter((log) =>
-      this.isThisWeek(new Date(log.workout_date))
-    );
+    const weeklyTarget = this.daysToWorkout.length || 1; // Avoid division by zero
+    const completedWorkouts = this.filterDaysWorked(logs).length;
     return {
-      completed: completedWorkouts.length,
+      completed: completedWorkouts,
       target: weeklyTarget,
+      percentage: ((completedWorkouts / weeklyTarget) * 100).toFixed(2),
     };
   }
 
-  private isThisWeek(date: Date): boolean {
-    const now = new Date();
-    const startOfWeek = this.getStartOfWeek(now);
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
+  private filterDaysWorked(logs: any[]): string[] {
+    const uniqueDates = new Set<string>();
 
-    return date >= startOfWeek && date <= endOfWeek;
+  logs.forEach(log => {
+    // Assuming the log has a 'date' field and the date is in a standard format like '2024-12-17T08:00:00Z'
+    const date = log.workoutDate.split('T')[0]; // Extract the date part (YYYY-MM-DD)
+    uniqueDates.add(date);
+  });
+
+  return Array.from(uniqueDates);
   }
 
   private getTodayId(): number {
     const today = new Date().getDay();
-    return today === 0 ? 7 : today;
-  }
-
-  private getStartOfWeek(date: Date): Date {
-    const start = new Date(date);
-    start.setDate(date.getDate() - date.getDay() + 1);
-    return start;
+    return today === 0 ? 7 : today; // Sunday as 7
   }
 
   private handleError(message: string, error: any): void {
     console.error(message, error);
-    this.isLoading = false;
   }
 }

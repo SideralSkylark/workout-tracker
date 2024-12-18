@@ -13,4 +13,12 @@ export class LogService {
   logWorkouts(workoutLogs: any[]): Observable<any> {
     return this.http.post<any>(`${this.apiBaseUrl}/workout-logs/log-workout`, workoutLogs);
   }
+
+  checkLogsForDate(date: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiBaseUrl}/workout-logs/logs-exist?date=${date}`);
+  }
+
+  getLogsForCurrentWeek(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiBaseUrl}/workout-logs/current-week`);
+  }  
 }

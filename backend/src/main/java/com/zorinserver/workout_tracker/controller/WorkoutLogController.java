@@ -2,10 +2,13 @@ package com.zorinserver.workout_tracker.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.zorinserver.workout_tracker.dto.WorkoutLogDTO;
 import com.zorinserver.workout_tracker.dto.WorkoutLogWithSetsDTO;
 import com.zorinserver.workout_tracker.entity.WorkoutLog;
 import com.zorinserver.workout_tracker.service.WorkoutLogService;
@@ -29,9 +32,41 @@ public class WorkoutLogController {
         return ResponseEntity.ok(workoutLogService.getLogsByDate(LocalDate.parse(date)));
     }
 
+    @GetMapping("/logs-exist")
+    public ResponseEntity<Boolean> checkLogsForDate(
+        @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        boolean logsExist = workoutLogService.logsExistForDate(date);
+        return ResponseEntity.ok(logsExist);
+    }
+
+    @GetMapping("/current-week")
+    public ResponseEntity<List<WorkoutLog>> getLogsForCurrentWeek() {
+        LocalDate today = LocalDate.now();
+        LocalDate startOfWeek = today.with(java.time.DayOfWeek.MONDAY);
+        LocalDate endOfWeek = startOfWeek.plusDays(6);
+
+        List<WorkoutLog> logs = workoutLogService.getLogsForDateRange(startOfWeek, endOfWeek);
+        return ResponseEntity.ok(logs);
+    }
+
+
     @PostMapping("/log-workout")
-    public ResponseEntity<?> logWorkouts(@RequestBody List<WorkoutLogWithSetsDTO> workoutLogDTOs) {
-        workoutLogDTOs.forEach(dto -> workoutLogService.createWorkoutLogFromDTO(dto));
-        return ResponseEntity.ok("Workout logs saved successfully");
+    public ResponseEntity<List<WorkoutLogDTO>> logWorkouts(@RequestBody List<WorkoutLogWithSetsDTO> workoutLogDTOs) {
+        List<WorkoutLog> savedLogs = workoutLogService.createWorkoutLogsFromDTOs(workoutLogDTOs);
+
+        List<WorkoutLogDTO> savedLogDTOs = savedLogs.stream()
+            .map(log -> {
+                WorkoutLogDTO dto = new WorkoutLogDTO();
+                dto.setId(log.getId());
+                dto.setWorkoutDate(log.getWorkoutDate());
+                dto.setExerciseId(log.getExercise().getId());
+                dto.setSplitId(log.getSplit().getId());
+                dto.setCompletedSets(log.getCompletedSets());
+                dto.setCompletedReps(log.getCompletedReps());
+                return dto;
+            }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(savedLogDTOs);
     }
 }

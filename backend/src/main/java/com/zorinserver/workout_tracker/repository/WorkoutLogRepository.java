@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface WorkoutLogRepository extends JpaRepository<WorkoutLog, Long> {
     List<WorkoutLog> findByWorkoutDate(LocalDate workoutDate);
+    boolean existsByWorkoutDate(LocalDate workoutDate);
+    List<WorkoutLog> findByWorkoutDateBetween(LocalDate startDate, LocalDate endDate);
     List<WorkoutLog> findBySplitId(Long splitId);
     boolean existsByExercise(Exercise exercise);
 }
