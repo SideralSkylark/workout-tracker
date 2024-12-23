@@ -9,7 +9,7 @@
   <div class="card bg-dark text-light mb-4 shadow-sm">
     <div class="card-body">
       <h5 class="card-title text-uppercase fw-semibold fs-5">Next Workout</h5>
-      <p *ngIf="nextWorkout; else noWorkout" class="mt-3 fs-6">
+      <p *ngIf="nextWorkout; else noWorkout" class="mt-2 fs-6">
         Scheduled for: <strong class="text-info">{{ nextWorkout?.name }}</strong>
       </p>
       <ng-template #noWorkout>
@@ -29,7 +29,7 @@
   <div class="card bg-dark text-light mb-4 shadow-sm">
     <div class="card-body">
       <h5 class="card-title text-uppercase fw-semibold fs-5">Weekly Progress</h5>
-      <p class="mt-3 fs-6">
+      <p class="mt-2 fs-6">
         Workouts Completed:
         <strong class="text-success">{{ weeklyProgress?.completed }}</strong> /
         <strong>{{ weeklyProgress?.target }}</strong>
@@ -61,14 +61,14 @@
   <div class="card bg-dark text-light shadow-sm">
     <div class="card-body">
       <h5 class="card-title text-uppercase fw-semibold fs-5">Recent Activity</h5>
-      <ul class="list-group list-group-flush mt-3">
+      <ul class="list-group list-group-flush mt-2">
         <li 
           class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center"
           *ngFor="let log of recentActivity"
         >
           <span class="fs-6">
             <strong>Workout Date:</strong> {{ log.workoutDate }} <br />
-            <strong>Completed Reps:</strong> {{ log.completedReps }}
+            <strong>Completed Reps:</strong> {{ log.reps }}
           </span>
           <i class="bi bi-check-circle text-success"></i>
         </li>

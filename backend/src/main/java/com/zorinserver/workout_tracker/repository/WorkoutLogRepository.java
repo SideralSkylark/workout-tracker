@@ -11,6 +11,7 @@ public interface WorkoutLogRepository extends JpaRepository<WorkoutLog, Long> {
     List<WorkoutLog> findByWorkoutDate(LocalDate workoutDate);
     boolean existsByWorkoutDate(LocalDate workoutDate);
     List<WorkoutLog> findByWorkoutDateBetween(LocalDate startDate, LocalDate endDate);
+    List<WorkoutLog> findByWorkoutDateBetweenAndSplitId(LocalDate startDate, LocalDate endDate, Long splitId);
     List<WorkoutLog> findBySplitId(Long splitId);
     boolean existsByExercise(Exercise exercise);
 }

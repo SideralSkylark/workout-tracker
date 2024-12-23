@@ -14,14 +14,14 @@
   </div>
 
   <div *ngIf="splits.length > 0; else noSplits">
-    <h3 class="fw-semibold fs-5 mb-3 mt-4">Your Workout Split</h3>
+    <h3 class="fw-semibold fs-4 mb-3 mt-4">Your Workout Split</h3>
     <div class="row">
       <div class="col-md-100 mb-3" *ngFor="let split of splits">
         <div class="card bg-dark shadow-sm">
           <div class="card-body">
-            <h5 class="card-title text-uppercase fw-semibold white-text">{{ split.name }}</h5>
+            <h5 class="card-title text-uppercase white-text">{{ split.name }}</h5>
             <button
-              class="btn btn-danger btn-sm w-100 mt-4 py-2"
+              class="btn btn-danger btn-sm w-100 mt-2 py-2"
               (click)="deleteSplit(split.id)"
             >
               <i class="bi bi-trash me-2"></i>Delete Split
@@ -32,12 +32,12 @@
     </div>
 
     <div *ngIf="daysToExercise.length > 0; else noExercises" class="mt-4">
-      <h3 class="fw-semibold fs-5 mb-3">Exercises by Day</h3>
+      <h3 class="fw-semibold fs-4 mb-3">Exercises by Day</h3>
       <div class="row">
         <div class="col-md-6 mb-3" *ngFor="let entry of daysToExercise">
           <div class="card bg-dark shadow-sm">
             <div class="card-body">
-              <h5 class="card-title text-uppercase fw-semibold white-text">{{ entry.day }}</h5>
+              <h5 class="card-title text-uppercase white-text">{{ entry.day }}</h5>
               <ul class="list-group list-group-flush mt-3">
                 <li
                   *ngFor="let exercise of entry.exercises"

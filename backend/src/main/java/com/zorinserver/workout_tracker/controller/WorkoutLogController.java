@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.zorinserver.workout_tracker.dto.LogByIdDTO;
 import com.zorinserver.workout_tracker.dto.WorkoutLogDTO;
 import com.zorinserver.workout_tracker.dto.WorkoutLogWithSetsDTO;
 import com.zorinserver.workout_tracker.entity.WorkoutLog;
@@ -41,15 +42,29 @@ public class WorkoutLogController {
     }
 
     @GetMapping("/current-week")
-    public ResponseEntity<List<WorkoutLog>> getLogsForCurrentWeek() {
+    public ResponseEntity<List<LogByIdDTO>> getLogsForCurrentWeek(
+        @RequestParam(value = "splitId", required = false) Long splitId) {
+        
         LocalDate today = LocalDate.now();
         LocalDate startOfWeek = today.with(java.time.DayOfWeek.MONDAY);
         LocalDate endOfWeek = startOfWeek.plusDays(6);
 
-        List<WorkoutLog> logs = workoutLogService.getLogsForDateRange(startOfWeek, endOfWeek);
+        List<LogByIdDTO> logs;
+
+        if (splitId != null) {
+            logs = workoutLogService.getLogsForDateRangeAndSplit(startOfWeek, endOfWeek, splitId);
+        } else {
+            logs = workoutLogService.getLogsForDateRange(startOfWeek, endOfWeek);
+        }
+
         return ResponseEntity.ok(logs);
     }
 
+    @GetMapping("/by-split/{splitId}")
+    public ResponseEntity<List<LogByIdDTO>> getLogsBySplitId(@PathVariable Long splitId) {
+        List<LogByIdDTO> logs = workoutLogService.getLogsBySplitId(splitId);
+        return ResponseEntity.ok(logs);
+    }
 
     @PostMapping("/log-workout")
     public ResponseEntity<List<WorkoutLogDTO>> logWorkouts(@RequestBody List<WorkoutLogWithSetsDTO> workoutLogDTOs) {

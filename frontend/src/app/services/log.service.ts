@@ -18,7 +18,15 @@ export class LogService {
     return this.http.get<boolean>(`${this.apiBaseUrl}/workout-logs/logs-exist?date=${date}`);
   }
 
-  getLogsForCurrentWeek(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiBaseUrl}/workout-logs/current-week`);
-  }  
+  getLogsForCurrentWeek(splitId?: number): Observable<any[]> {
+    let url = `${this.apiBaseUrl}/workout-logs/current-week`;
+    if (splitId !== undefined) {
+      url += `?splitId=${splitId}`;
+    }
+    return this.http.get<any[]>(url);
+  }   
+  
+  getLogsBySplitId(splitId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiBaseUrl}/workout-logs/by-split/${splitId}`);
+  }
 }

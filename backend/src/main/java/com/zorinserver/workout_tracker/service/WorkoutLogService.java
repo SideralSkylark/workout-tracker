@@ -1,13 +1,16 @@
 package com.zorinserver.workout_tracker.service;
 
+import com.zorinserver.workout_tracker.dto.LogByIdDTO;
 import com.zorinserver.workout_tracker.dto.WorkoutLogWithSetsDTO;
 import com.zorinserver.workout_tracker.entity.Exercise;
 import com.zorinserver.workout_tracker.entity.Split;
 import com.zorinserver.workout_tracker.entity.WorkoutLog;
 import com.zorinserver.workout_tracker.entity.WorkoutSet;
+import com.zorinserver.workout_tracker.mapper.WorkoutLogMapper;
 import com.zorinserver.workout_tracker.repository.ExerciseRepository;
 import com.zorinserver.workout_tracker.repository.SplitRepository;
 import com.zorinserver.workout_tracker.repository.WorkoutLogRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -42,8 +45,18 @@ public class WorkoutLogService {
         return workoutLogRepository.existsByWorkoutDate(date);
     }
 
-    public List<WorkoutLog> getLogsForDateRange(LocalDate startDate, LocalDate endDate) {
-        return workoutLogRepository.findByWorkoutDateBetween(startDate, endDate);
+    public List<LogByIdDTO> getLogsForDateRange(LocalDate startDate, LocalDate endDate) {
+        return workoutLogRepository.findByWorkoutDateBetween(startDate, endDate)
+                .stream()
+                .map(WorkoutLogMapper::toLogByIdDTO)
+                .collect(Collectors.toList());
+    }   
+    
+    public List<LogByIdDTO> getLogsForDateRangeAndSplit(LocalDate startDate, LocalDate endDate, Long splitId) {
+        return workoutLogRepository.findByWorkoutDateBetweenAndSplitId(startDate, endDate, splitId)
+                .stream()
+                .map(WorkoutLogMapper::toLogByIdDTO)
+                .collect(Collectors.toList());
     }    
 
     public WorkoutLog saveWorkoutLogWithSets(WorkoutLog workoutLog, List<WorkoutSet> sets) {
@@ -55,6 +68,13 @@ public class WorkoutLogService {
         workoutLog.setWorkoutSets(sets);
 
         return workoutLogRepository.save(workoutLog);
+    }
+
+    public List<LogByIdDTO> getLogsBySplitId(Long splitId) {
+        return workoutLogRepository.findBySplitId(splitId)
+                .stream()
+                .map(WorkoutLogMapper::toLogByIdDTO)
+                .collect(Collectors.toList());
     }
 
     public List<WorkoutLog> createWorkoutLogsFromDTOs(List<WorkoutLogWithSetsDTO> dtos) {

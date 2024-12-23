@@ -32,38 +32,40 @@ export class DashboardComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
-
+  
     try {
-      // Load all data simultaneously
-      const [logsExist, splits, weeklyLogs] = await Promise.all([
-        this.checkIfLogsExistForToday(),
-        this.loadWorkoutSplits(),
-        this.loadWeeklyLogs(),
-      ]);
-
-      this.workoutLogged = logsExist;
+      const splits = await this.loadWorkoutSplits();
       this.splits = splits;
-      this.recentActivity = this.getRecentActivity(weeklyLogs);
-
+  
       if (this.splits.length > 0) {
-        await this.loadNextWorkout(this.splits[0].id);
+        const selectedSplitId = this.splits[0].id;
+  
+        const [logsExist, weeklyLogs] = await Promise.all([
+          this.checkIfLogsExistForToday(),
+          this.loadWeeklyLogs(selectedSplitId),
+        ]);
+  
+        this.workoutLogged = logsExist;
+        this.recentActivity = this.getRecentActivity(weeklyLogs);
+  
+        await this.loadNextWorkout(selectedSplitId);
+  
+        this.weeklyProgress = this.calculateWeeklyProgress(weeklyLogs);
       }
-
-      this.weeklyProgress = this.calculateWeeklyProgress(weeklyLogs);
     } catch (error) {
       this.handleError('Error loading dashboard', error);
     } finally {
       this.isLoading = false;
     }
-  }
+  }  
 
   private async loadWorkoutSplits(): Promise<any[]> {
     return lastValueFrom(this.workoutService.getWorkoutSplits());
   }
 
-  private async loadWeeklyLogs(): Promise<any[]> {
-    return lastValueFrom(this.logService.getLogsForCurrentWeek());
-  }
+  private async loadWeeklyLogs(splitId?: number): Promise<any[]> {
+    return lastValueFrom(this.logService.getLogsForCurrentWeek(splitId));
+  }  
 
   private async checkIfLogsExistForToday(): Promise<boolean> {
     const todayDate = new Date().toISOString().split('T')[0];
@@ -77,12 +79,12 @@ export class DashboardComponent implements OnInit {
 
   private async loadNextWorkout(splitId: number): Promise<void> {
     try {
-      const days: any[] = await lastValueFrom(this.getWorkoutDays(splitId)); // Assuming `days` is an array of objects
+      const days: any[] = await lastValueFrom(this.getWorkoutDays(splitId)); 
       const todayId = this.getTodayId();
       const sortedDays = days.sort((a: any, b: any) => a.id - b.id);
   
       this.daysToWorkout = sortedDays;
-      this.nextWorkout = sortedDays.find((day: any) => day.id === todayId) || null; // Explicitly type `day`
+      this.nextWorkout = sortedDays.find((day: any) => day.id === todayId) || null; 
       this.isWorkoutToday = Boolean(this.nextWorkout);
     } catch (error) {
       this.handleError('Error fetching workout days', error);
@@ -104,7 +106,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private calculateWeeklyProgress(logs: any[]): any {
-    const weeklyTarget = this.daysToWorkout.length || 1; // Avoid division by zero
+    const weeklyTarget = this.daysToWorkout.length || 1;
     const completedWorkouts = this.filterDaysWorked(logs).length;
     return {
       completed: completedWorkouts,
@@ -117,8 +119,7 @@ export class DashboardComponent implements OnInit {
     const uniqueDates = new Set<string>();
 
   logs.forEach(log => {
-    // Assuming the log has a 'date' field and the date is in a standard format like '2024-12-17T08:00:00Z'
-    const date = log.workoutDate.split('T')[0]; // Extract the date part (YYYY-MM-DD)
+    const date = log.workoutDate.split('T')[0];
     uniqueDates.add(date);
   });
 
