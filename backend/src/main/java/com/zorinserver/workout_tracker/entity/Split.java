@@ -35,4 +35,9 @@ public class Split {
     @OneToMany(mappedBy = "split", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<WorkoutLog> workoutLogs;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
 }

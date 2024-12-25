@@ -1,0 +1,19 @@
+/* src/app/auth/register/register.component.css */
+.register-container {
+    background-color: #212529; /* Dark background color */
+  }
+  
+  .card {
+    background-color: #343a40; /* Slightly lighter background for the card */
+    border-radius: 8px;
+  }
+  
+  .text-white {
+    color: #fff !important;
+  }
+  
+  button:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+  }
+  

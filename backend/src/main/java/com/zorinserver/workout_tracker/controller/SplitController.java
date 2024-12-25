@@ -12,16 +12,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zorinserver.workout_tracker.dto.CreateSplitDTO;
 import com.zorinserver.workout_tracker.entity.Split;
+import com.zorinserver.workout_tracker.entity.User;
+import com.zorinserver.workout_tracker.repository.UserRepository;
 import com.zorinserver.workout_tracker.service.SplitService;
 
 @RestController
 @RequestMapping("/api/splits")
 public class SplitController {
     private final SplitService splitService;
+    private final UserRepository userRepository;
 
-    public SplitController(SplitService splitService) {
+    public SplitController(
+        SplitService splitService,
+        UserRepository userRepository) {
         this.splitService = splitService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -35,7 +42,12 @@ public class SplitController {
     }
 
     @PostMapping
-    public ResponseEntity<Split> createSplit(@RequestBody Split split) {
+    public ResponseEntity<Split> createSplit(@RequestBody CreateSplitDTO createSplitDTO) {
+        User user = userRepository.findById(Long.parseLong(createSplitDTO.getUser_id()))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Split split = new Split();
+        split.setName(createSplitDTO.getName());
+        split.setUser(user);
         return ResponseEntity.ok(splitService.createSplit(split));
     }
 

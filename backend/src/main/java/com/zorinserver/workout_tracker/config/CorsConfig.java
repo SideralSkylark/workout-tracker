@@ -14,7 +14,9 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:4200") // Angular dev server URL
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }

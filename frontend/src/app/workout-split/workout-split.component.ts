@@ -65,7 +65,8 @@ export class WorkoutSplitComponent {
 
   createSplit(): void {
     if (this.newSplitName.trim()) {
-      const splitData = { name: this.newSplitName };
+      const user_id = localStorage.getItem('user_id') || '';
+      const splitData = { user_id: user_id, name: this.newSplitName };
 
       this.workoutService.createSplit(splitData).subscribe(() => {
         this.newSplitName = '';

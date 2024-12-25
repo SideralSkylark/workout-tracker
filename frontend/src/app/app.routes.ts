@@ -3,7 +3,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 
 export const routes: Routes = [
   {
-    path: '',
+    path: 'dashboard',
     pathMatch: 'full',
     loadComponent: () => {
       return import('./dashboard/dashboard.component').then(m => m.DashboardComponent);
@@ -26,5 +26,17 @@ export const routes: Routes = [
     loadComponent: () => {
       return import('./progress/progress.component').then(m => m.ProgressComponent);
     },
-  }
+  },
+  {
+    path: '',
+    loadComponent: () => {
+      return import('./auth/login/login.component').then(m => m.LoginComponent);
+    },
+  },
+  {
+    path: 'register',
+    loadComponent:() => {
+      return import('./auth/register/register.component').then(m => m.RegisterComponent);
+    },
+  },
 ];

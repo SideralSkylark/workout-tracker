@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../services/workout.service';
 import { CommonModule } from '@angular/common';
@@ -22,7 +22,8 @@ export class DashboardComponent implements OnInit {
   workoutLogged: boolean = false;
   weeklyProgress: any = null;
   recentActivity: any = null;
-  userName = signal('Sidik');
+  userName: string = '';
+  userId: number | null = null;
 
   constructor(
     private workoutService: WorkoutService,
@@ -32,32 +33,37 @@ export class DashboardComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
-  
+
     try {
-      const splits = await this.loadWorkoutSplits();
-      this.splits = splits;
-  
+      // Load from local storage or cache
+      this.userName = localStorage.getItem('username') || '';
+      this.userId = parseInt(localStorage.getItem('user_id') || '0', 10) || null;
+      const cachedSplits = localStorage.getItem('splits');
+      this.splits = cachedSplits ? JSON.parse(cachedSplits) : [];
+
       if (this.splits.length > 0) {
         const selectedSplitId = this.splits[0].id;
-  
+
         const [logsExist, weeklyLogs] = await Promise.all([
           this.checkIfLogsExistForToday(),
           this.loadWeeklyLogs(selectedSplitId),
         ]);
-  
+
         this.workoutLogged = logsExist;
         this.recentActivity = this.getRecentActivity(weeklyLogs);
-  
+
         await this.loadNextWorkout(selectedSplitId);
-  
+
         this.weeklyProgress = this.calculateWeeklyProgress(weeklyLogs);
+      } else {
+        console.warn('No splits found in cache.');
       }
     } catch (error) {
       this.handleError('Error loading dashboard', error);
     } finally {
       this.isLoading = false;
     }
-  }  
+  }
 
   private async loadWorkoutSplits(): Promise<any[]> {
     return lastValueFrom(this.workoutService.getWorkoutSplits());
@@ -65,7 +71,7 @@ export class DashboardComponent implements OnInit {
 
   private async loadWeeklyLogs(splitId?: number): Promise<any[]> {
     return lastValueFrom(this.logService.getLogsForCurrentWeek(splitId));
-  }  
+  }
 
   private async checkIfLogsExistForToday(): Promise<boolean> {
     const todayDate = new Date().toISOString().split('T')[0];
@@ -79,17 +85,17 @@ export class DashboardComponent implements OnInit {
 
   private async loadNextWorkout(splitId: number): Promise<void> {
     try {
-      const days: any[] = await lastValueFrom(this.getWorkoutDays(splitId)); 
+      const days: any[] = await lastValueFrom(this.getWorkoutDays(splitId));
       const todayId = this.getTodayId();
       const sortedDays = days.sort((a: any, b: any) => a.id - b.id);
-  
+
       this.daysToWorkout = sortedDays;
-      this.nextWorkout = sortedDays.find((day: any) => day.id === todayId) || null; 
+      this.nextWorkout = sortedDays.find((day: any) => day.id === todayId) || null;
       this.isWorkoutToday = Boolean(this.nextWorkout);
     } catch (error) {
       this.handleError('Error fetching workout days', error);
     }
-  }  
+  }
 
   private getWorkoutDays(splitId: number): Observable<any> {
     return this.dayService.getDaysWithWorkouts(splitId);
@@ -118,12 +124,12 @@ export class DashboardComponent implements OnInit {
   private filterDaysWorked(logs: any[]): string[] {
     const uniqueDates = new Set<string>();
 
-  logs.forEach(log => {
-    const date = log.workoutDate.split('T')[0];
-    uniqueDates.add(date);
-  });
+    logs.forEach((log) => {
+      const date = log.workoutDate.split('T')[0];
+      uniqueDates.add(date);
+    });
 
-  return Array.from(uniqueDates);
+    return Array.from(uniqueDates);
   }
 
   private getTodayId(): number {

@@ -14,7 +14,7 @@ export class WorkoutService {
     return this.http.get(`${this.apiBaseUrl}/splits`);
   }
 
-  createSplit(splitData: {name: string}): Observable<any> {
+  createSplit(splitData: {user_id: string, name: string}): Observable<any> {
     return this.http.post(`${this.apiBaseUrl}/splits`, splitData);
   }
 
