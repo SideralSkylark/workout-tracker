@@ -43,8 +43,12 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('jwt');
-    this.router.navigate(['/login']);
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('username');
+    localStorage.removeItem('splits');
+    this.router.navigate(['/']);
   }
+  
 
   register(username: string, password: string) {
     const user = { username, password };

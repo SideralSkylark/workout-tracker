@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { HeaderComponent } from './components/header/header.component';
 
@@ -12,4 +12,11 @@ import { HeaderComponent } from './components/header/header.component';
 })
 export class AppComponent {
   title = 'frontend';
+
+  constructor(private router: Router) {}
+
+  get hideHeader(): boolean {
+    const routesWithoutHeader = ['/', '/register'];
+    return routesWithoutHeader.includes(this.router.url);
+  }
 }

@@ -1,31 +1,32 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { authGuard } from './auth/auth.guard';
 
 export const routes: Routes = [
   {
     path: 'dashboard',
     pathMatch: 'full',
-    loadComponent: () => {
-      return import('./dashboard/dashboard.component').then(m => m.DashboardComponent);
-    },
+    loadComponent: () => 
+      import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
+    canActivate: [authGuard]
   },
   {
     path: 'workout-split',
-    loadComponent: () => {
-      return import('./workout-split/workout-split.component').then(m => m.WorkoutSplitComponent);
-    },
+    loadComponent: () => 
+      import('./workout-split/workout-split.component').then(m => m.WorkoutSplitComponent),
+    canActivate: [authGuard]
   },
   {
     path: 'log-workout',
-    loadComponent: () => {
-      return import('./log-workout/log-workout.component').then(m => m.LogWorkoutComponent);
-    },
+    loadComponent: () => 
+      import('./log-workout/log-workout.component').then(m => m.LogWorkoutComponent),
+    canActivate: [authGuard]
   },
   {
     path: 'progress',
-    loadComponent: () => {
-      return import('./progress/progress.component').then(m => m.ProgressComponent);
-    },
+    loadComponent: () => 
+      import('./progress/progress.component').then(m => m.ProgressComponent),
+    canActivate: [authGuard]
   },
   {
     path: '',
@@ -39,4 +40,10 @@ export const routes: Routes = [
       return import('./auth/register/register.component').then(m => m.RegisterComponent);
     },
   },
+  {
+    path: '**',
+    loadComponent: () => {
+      return import('./page-not-found/page-not-found.component').then(m => m.PageNotFoundComponent);
+    }
+  }
 ];

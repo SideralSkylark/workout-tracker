@@ -1,8 +1,17 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<!-- src/app/header/app-header.component.html -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" *ngIf="!hideHeader">
   <div class="container-fluid">
     <a class="navbar-brand no-underline">Workout Tracker</a>
     
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
       <span class="navbar-toggler-icon"></span>
     </button>
     
@@ -19,6 +28,9 @@
         </li>
         <li class="nav-item">
           <a class="nav-link text-iceblue" routerLink="/progress">Progress</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-iceblue" (click)="logout()">Log out</a>
         </li>
       </ul>
     </div>
