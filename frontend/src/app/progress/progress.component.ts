@@ -13,19 +13,20 @@ import { DayService } from '../services/day.service';
   styleUrls: ['./progress.component.css'],
 })
 export class ProgressComponent {
-  private isLoading: boolean = true;
+  isLoading: boolean = true;
   logs: any[] = [];
   weeklyLogs: any[] = [];
-  private daysToWorkout: string[] = [];
-  private splits: any[] = [];
   daysWorked: string[] = [];
   daysMissed: string[] = [];
   daysLeft: string[] = [];
   groupedLogs: { date: string; logs: any[] }[] = [];
   filteredLogs: { date: string; logs: any[] }[] = [];
-
   filterText: string = '';
   filterTime: string = 'all';
+
+  private userId: number | null = null;
+  private daysToWorkout: string[] = [];
+  private splits: any[] = [];
 
   constructor(
     private logService: LogService,
@@ -35,27 +36,9 @@ export class ProgressComponent {
 
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
-
     try {
-      const splits = await this.loadWorkoutSplits();
-      this.splits = splits;
-
-      if (this.splits.length > 0) {
-        const splitId = this.splits[0].id; // Using the first split as an example
-        await this.loadDaysToWorkout(splitId);
-
-        const logs = await this.loadLogsBySplitId(splitId);
-        const weeklyLogs = await this.loadWeeklyLogs();
-
-        this.logs = logs;
-        this.weeklyLogs = weeklyLogs;
-
-        this.calculateWeeklyProgress(this.weeklyLogs);
-        this.groupLogsByDate(this.logs);
-        this.applyFilters(); // Initialize filtered logs
-      } else {
-        console.warn('No splits available to load logs.');
-      }
+      this.initializeUserDetails();
+      await this.loadWorkoutData();
     } catch (error) {
       this.handleError('Error loading dashboard', error);
     } finally {
@@ -63,16 +46,30 @@ export class ProgressComponent {
     }
   }
 
-  private async loadLogsBySplitId(splitId: number): Promise<any[]> {
-    return lastValueFrom(this.logService.getLogsBySplitId(splitId));
+  private initializeUserDetails(): void {
+    const userId = localStorage.getItem('user_id');
+    this.userId = userId ? parseInt(userId, 10) : null;
   }
 
-  private async loadWeeklyLogs(): Promise<any[]> {
-    return lastValueFrom(this.logService.getLogsForCurrentWeek());
+  private async loadWorkoutData(): Promise<void> {
+    if (!this.userId) return;
+
+    this.splits = await this.loadWorkoutSplits(this.userId);
+    if (this.splits.length === 0) return;
+
+    const splitId = this.splits[0].id;
+    await this.loadDaysToWorkout(splitId);
+
+    this.logs = await this.loadLogsBySplitId(splitId);
+    this.weeklyLogs = await this.loadWeeklyLogs(splitId);
+
+    this.calculateWeeklyProgress();
+    this.groupLogsByDate();
+    this.applyFilters();
   }
 
-  private async loadWorkoutSplits(): Promise<any[]> {
-    return lastValueFrom(this.workoutService.getWorkoutSplits());
+  private async loadWorkoutSplits(userId: number): Promise<any[]> {
+    return lastValueFrom(this.workoutService.getSplitsByUserId(userId));
   }
 
   private async loadDaysToWorkout(splitId: number): Promise<void> {
@@ -86,23 +83,27 @@ export class ProgressComponent {
     }
   }
 
-  private calculateWeeklyProgress(weeklyLogs: any[]): void {
-    this.daysWorked = this.getDaysWorked(weeklyLogs);
+  private async loadLogsBySplitId(splitId: number): Promise<any[]> {
+    return lastValueFrom(this.logService.getLogsBySplitId(splitId));
+  }
+
+  private async loadWeeklyLogs(splitId: number): Promise<any[]> {
+    return lastValueFrom(this.logService.getLogsForCurrentWeek(splitId));
+  }
+
+  private calculateWeeklyProgress(): void {
+    this.daysWorked = this.getDaysWorked(this.weeklyLogs);
     this.daysMissed = this.getDaysMissed(this.daysWorked, this.daysToWorkout);
     this.daysLeft = this.getDaysLeft(this.daysWorked, this.daysMissed);
   }
 
-  private groupLogsByDate(logs: any[]): void {
+  private groupLogsByDate(): void {
     const grouped: { [key: string]: any[] } = {};
-
-    logs.forEach((log) => {
+    this.logs.forEach((log) => {
       const date = new Date(log.workoutDate).toLocaleDateString('en-US');
-      if (!grouped[date]) {
-        grouped[date] = [];
-      }
+      grouped[date] = grouped[date] || [];
       grouped[date].push(log);
     });
-
     this.groupedLogs = Object.keys(grouped).map((date) => ({
       date,
       logs: grouped[date],
@@ -110,55 +111,55 @@ export class ProgressComponent {
   }
 
   applyFilters(): void {
-    let filtered = [...this.groupedLogs];
+    this.filteredLogs = this.groupedLogs
+      .filter((group) =>
+        this.filterText
+          ? group.logs.some((log) =>
+              log.name.toLowerCase().includes(this.filterText.toLowerCase())
+            )
+          : true
+      )
+      .filter((group) => {
+        if (this.filterTime === 'all') return true;
 
-    if (this.filterText) {
-      filtered = filtered.map((group) => ({
-        ...group,
-        logs: group.logs.filter((log) =>
-          log.name.toLowerCase().includes(this.filterText.toLowerCase())
-        ),
-      })).filter((group) => group.logs.length > 0);
-    }
-
-    if (this.filterTime !== 'all') {
-      const now = new Date();
-      const startDate =
-        this.filterTime === 'week'
-          ? new Date(now.setDate(now.getDate() - now.getDay()))
-          : new Date(now.setMonth(now.getMonth() - 1));
-
-      filtered = filtered.filter((group) =>
-        new Date(group.date) >= startDate
-      );
-    }
-
-    this.filteredLogs = filtered;
+        const now = new Date();
+        const startDate =
+          this.filterTime === 'week'
+            ? new Date(now.setDate(now.getDate() - now.getDay()))
+            : new Date(now.setMonth(now.getMonth() - 1));
+        return new Date(group.date) >= startDate;
+      });
   }
 
   private getDaysWorked(logs: any[]): string[] {
-    const workedDays = new Set<string>();
-    logs.forEach((log) => {
-      const date = new Date(log.workoutDate).toLocaleDateString('en-US', {
-        weekday: 'long',
-      });
-      workedDays.add(date);
-    });
-
-    return Array.from(workedDays);
+    return Array.from(
+      new Set(
+        logs.map((log) =>
+          new Date(log.workoutDate).toLocaleDateString('en-US', {
+            weekday: 'long',
+          })
+        )
+      )
+    );
   }
 
   private getDaysMissed(workedDays: string[], targetDays: string[]): string[] {
-    return targetDays.filter((day) => !workedDays.includes(day));
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    const pastDays = targetDays.slice(0, targetDays.indexOf(today) + 1);
+    return pastDays.filter((day) => !workedDays.includes(day));
   }
 
   private getDaysLeft(workedDays: string[], missedDays: string[]): string[] {
     const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
     const todayIndex = this.daysToWorkout.indexOf(today);
 
+    if (todayIndex === -1) return [];
+
     return this.daysToWorkout
       .slice(todayIndex + 1)
-      .filter((day) => !workedDays.includes(day) && !missedDays.includes(day));
+      .filter(
+        (day) => !workedDays.includes(day) && !missedDays.includes(day)
+      );
   }
 
   private handleError(message: string, error: any): void {

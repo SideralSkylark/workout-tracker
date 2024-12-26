@@ -14,16 +14,13 @@ export class LogService {
     return this.http.post<any>(`${this.apiBaseUrl}/workout-logs/log-workout`, workoutLogs);
   }
 
-  checkLogsForDate(date: string): Observable<boolean> {
-    return this.http.get<boolean>(`${this.apiBaseUrl}/workout-logs/logs-exist?date=${date}`);
-  }
+  checkLogsForDateAndSplit(date: string, split_id: number): Observable<boolean> {
+    const params = { date, splitId: split_id.toString() };
+    return this.http.get<boolean>(`${this.apiBaseUrl}/workout-logs/logs-exist`, { params });
+  }  
 
-  getLogsForCurrentWeek(splitId?: number): Observable<any[]> {
-    let url = `${this.apiBaseUrl}/workout-logs/current-week`;
-    if (splitId !== undefined) {
-      url += `?splitId=${splitId}`;
-    }
-    return this.http.get<any[]>(url);
+  getLogsForCurrentWeek(splitId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiBaseUrl}/workout-logs/current-week?splitId=${splitId}`);
   }   
   
   getLogsBySplitId(splitId: number): Observable<any[]> {

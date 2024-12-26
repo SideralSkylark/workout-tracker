@@ -5,6 +5,7 @@ import { ExerciseService } from '../services/exercise.service';
 import { FormsModule } from '@angular/forms';
 import { LogService } from '../services/log.service';
 import { RouterLink } from '@angular/router';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-log-workout',
@@ -15,30 +16,59 @@ import { RouterLink } from '@angular/router';
 export class LogWorkoutComponent {
   isLoading: boolean = true;
   split: any[] = [];
-  splitId: any = 0 || null;
+  splitId: number | null = null
   exercises: any[] = [];
   logsExist: boolean = false;
+  private userId: number | null = null;
 
   constructor(
     private workoutService: WorkoutService,
     private exerciseService: ExerciseService,
     private logService: LogService) {}
 
-  ngOnInit(): void {
-    this.checkIfLogsExistForToday();
+  async ngOnInit(): Promise<void> {
+    try {
+      this.initializeUserDetails();
+      await this.loadWorkoutData();
+    } catch (error) {
+      this.handleError('Error loading workouts', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
+
+  private initializeUserDetails(): void {
+    this.userId = parseInt(localStorage.getItem('user_id') || '0', 10) || null;
+  }
+
+  private async loadWorkoutData(): Promise<void> {
+    if (!this.userId) return;
+
+    this.split = await this.loadWorkoutSplits(this.userId);
+    if (this.split.length === 0) return;
+
+    this.splitId = this.split[0].id;
+    this.checkIfLogsExistForToday();
+
+  }
+
+  private async loadWorkoutSplits(userId: number): Promise<any[]> {
+      return lastValueFrom(this.workoutService.getSplitsByUserId(userId));
+    }
 
   private getTodayId(): number {
     const today = new Date().getDay();
     return today === 0 ? 7 : today;
   }
 
-  private checkIfLogsExistForToday(): void {
+  private async checkIfLogsExistForToday(): Promise<void> {
+    if (!this.splitId) return;
     const todayDate = new Date().toISOString().split('T')[0];
-    this.logService.checkLogsForDate(todayDate).subscribe({
-      next: (logsExist: boolean) => {
+    this.logService.checkLogsForDateAndSplit(todayDate, this.splitId).subscribe({
+      next: async (logsExist: boolean) => {
         this.logsExist = logsExist;
-        this.loadSplitAndWorkout();
+        
+        this.loadTodayWorkout();
       },
       error: (error) => {
         console.error('Error checking logs for today:', error);
@@ -47,15 +77,8 @@ export class LogWorkoutComponent {
     });
   }
 
-  private loadSplitAndWorkout(): void {
-    this.workoutService.getWorkoutSplits().subscribe((splits) => {
-      this.splitId = splits[0].id;
-      this.loadTodayWorkout();
-      this.isLoading = false;
-    });
-  }
-
   loadTodayWorkout(): void {
+    if (!this.splitId) return;
     this.exerciseService.getExercisesByDayAndSplit(this.getTodayId(), this.splitId).subscribe((exercises) => {
       this.exercises = exercises.map((exercise: any) => ({
         id: exercise.id, // Include exercise ID for later submission
@@ -88,11 +111,16 @@ export class LogWorkoutComponent {
         console.log('Workout logged successfully:', savedLogs);
         alert('Workout logged successfully!');
         this.exercises = [];
+        this.logsExist = true;
       },
       error: (error) => {
         console.error('Error logging workout:', error);
         alert('An error occurred while logging your workout.');
       },
     });
+  }
+
+  private handleError(message: string, error: any): void {
+    console.error(message, error);
   }
 }

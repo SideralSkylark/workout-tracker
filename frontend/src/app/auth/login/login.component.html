@@ -1,7 +1,8 @@
 <div class="login-container d-flex justify-content-center align-items-center vh-100" style="background-color: #212529;">
-  <div class="card p-4 shadow-lg" style="max-width: 400px; width: 100%; background-color: #2d2f36; border: none;">
+  <div class="card p-4 shadow-lg" style="max-width: 400px; width: 100%; background-color: #2d2f36; border-radius: 10px; border: none;">
     <h2 class="text-center text-light mb-4">Login</h2>
     <form (ngSubmit)="onLogin()">
+      <!-- Username Field -->
       <div class="mb-3">
         <label for="username" class="form-label text-light">Username</label>
         <input
@@ -10,10 +11,14 @@
           [(ngModel)]="username"
           name="username"
           class="form-control"
-          style="background-color: #3c3f47; color: #e0e0e0; border: none;"
+          style="background-color: #3c3f47; color: #e0e0e0; border-radius: 8px; border: none;"
           required
+          aria-describedby="usernameHelp"
         />
+        <small id="usernameHelp" class="form-text" style="color: rgb(187, 186, 186);" >Enter your username.</small>
       </div>
+
+      <!-- Password Field -->
       <div class="mb-3">
         <label for="password" class="form-label text-light">Password</label>
         <input
@@ -22,24 +27,32 @@
           [(ngModel)]="password"
           name="password"
           class="form-control"
-          style="background-color: #3c3f47; color: #e0e0e0; border: none;"
+          style="background-color: #3c3f47; color: #e0e0e0; border-radius: 8px; border: none;"
           required
+          aria-describedby="passwordHelp"
         />
+        <small id="passwordHelp" class="form-text" style="color: rgb(187, 186, 186);">Enter your password.</small>
       </div>
-      <div *ngIf="errorMessage" class="alert alert-danger text-center">
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="alert alert-danger text-center mb-3" role="alert">
         {{ errorMessage }}
       </div>
+
+      <!-- Submit Button -->
       <button
         type="submit"
         class="btn btn-primary w-100"
-        style="background-color: #0dcaf0; border-color: #0dcaf0; color: #212529;"
+        style="background-color: #0dcaf0; border-color: #0dcaf0; color: #212529; border-radius: 8px;"
         [disabled]="!username || !password"
       >
         Login
       </button>
     </form>
+
+    <!-- Register Link -->
     <div class="text-center mt-3">
-      <a routerLink="/register" style="color: #0dcaf0; text-decoration: none;">Don't have an account? Register here</a>
+      <a routerLink="/register" style="color: #0dcaf0; text-decoration: none; font-size: 0.9rem;">Don't have an account? Register here</a>
     </div>
   </div>
 </div>

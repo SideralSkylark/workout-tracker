@@ -4,21 +4,23 @@
     <h2 class="fw-bold fs-3">Dashboard</h2>
     <span class="text-secondary fs-6">Welcome back, {{ userName }}!</span>
   </div>
-  <hr />
+  <hr class="border-secondary" />
 
+  <!-- Next Workout Card -->
   <div class="card bg-dark text-light mb-4 shadow-sm">
     <div class="card-body">
       <h5 class="card-title text-uppercase fw-semibold fs-5">Next Workout</h5>
-      <p *ngIf="nextWorkout; else noWorkout" class="mt-2 fs-6">
-        Scheduled for: <strong class="text-info">{{ nextWorkout?.name }}</strong>
+      <p *ngIf="nextWorkout; else noWorkout" class="mt-3 fs-6">
+        Next workout day: 
+        <strong class="text-info">{{ nextWorkout.name }}</strong>
       </p>
       <ng-template #noWorkout>
         <p class="text-warning mt-3 fs-6">No workout scheduled for today.</p>
       </ng-template>
       <button
         class="btn btn-primary mt-4 w-100 py-2"
-        [disabled]="!isWorkoutToday || workoutLogged"
-        [title]="isWorkoutToday ? '' : 'No workout scheduled for today'"
+        [disabled]="!isWorkoutToday"
+        [title]="!isWorkoutToday ? 'Workout already logged or not scheduled for today' : ''"
         routerLink="/log-workout"
       >
         <i class="bi bi-play-circle me-2"></i> Start Workout
@@ -26,44 +28,48 @@
     </div>
   </div>
 
-  <div class="card bg-dark text-light mb-4 shadow-sm">
+  <!-- Weekly Progress Card -->
+  <div class="card bg-dark text-light mb-4 shadow-sm ">
     <div class="card-body">
       <h5 class="card-title text-uppercase fw-semibold fs-5">Weekly Progress</h5>
-      <p class="mt-2 fs-6">
+      <p class="mt-3 fs-6">
         Workouts Completed:
         <strong class="text-success">{{ weeklyProgress?.completed }}</strong> /
         <strong>{{ weeklyProgress?.target }}</strong>
       </p>
-      <div class="progress mt-3" style="height: 20px;">
+      <div 
+        class="progress mt-3 position-relative" 
+        style="height: 20px; background-color: #2c2c2c;"
+      >
         <div
-          class="progress-bar bg-success"
+          class="progress-bar bg-success progress-bar-striped progress-bar-animated"
           role="progressbar"
           [style.width.%]="(weeklyProgress?.completed / weeklyProgress?.target) * 100"
           [attr.aria-valuenow]="weeklyProgress?.completed"
           [attr.aria-valuemin]="0"
           [attr.aria-valuemax]="weeklyProgress?.target"
         >
-          <span class="fs-6">
-            {{ ((weeklyProgress?.completed / weeklyProgress?.target) * 100) | number: '1.0-0' }}%
-          </span>
         </div>
+        <span class="position-absolute w-100 text-center fs-6" style="text-shadow: 2px 2px 2px black;">
+          {{ ((weeklyProgress?.completed / weeklyProgress?.target) * 100) | number: '1.0-0' }}%
+        </span>
       </div>
       <button 
-      class="btn btn-secondary mt-4 w-100 py-2"
-      routerLink="/progress"
+        class="btn btn-secondary mt-4 w-100 py-2"
+        routerLink="/progress"
       >
         <i class="bi bi-bar-chart-line me-2"></i> View Detailed Progress
       </button>
     </div>
   </div>
 
- 
-  <div class="card bg-dark text-light shadow-sm">
+  <!-- Recent Activity Card -->
+  <div class="card bg-dark text-light shadow-sm mb-4 border-light">
     <div class="card-body">
       <h5 class="card-title text-uppercase fw-semibold fs-5">Recent Activity</h5>
-      <ul class="list-group list-group-flush mt-2">
+      <ul class="list-group list-group-flush mt-3">
         <li 
-          class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center"
+          class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-light"
           *ngFor="let log of recentActivity"
         >
           <span class="fs-6">
@@ -72,10 +78,13 @@
           </span>
           <i class="bi bi-check-circle text-success"></i>
         </li>
+        <li *ngIf="!recentActivity" class="list-group-item bg-dark text-light">
+          <p class="text-center fs-6 text-muted">No recent activity logged.</p>
+        </li>
       </ul>
       <button 
-      class="btn btn-outline-light mt-4 w-100 py-2"
-      routerLink="/progress"
+        class="btn btn-outline-light mt-4 w-100 py-2"
+        routerLink="/progress"
       >
         <i class="bi bi-clock-history me-2"></i> View All Activity
       </button>

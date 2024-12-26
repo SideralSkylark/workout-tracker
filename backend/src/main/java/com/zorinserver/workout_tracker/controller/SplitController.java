@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zorinserver.workout_tracker.dto.CreateSplitDTO;
+import com.zorinserver.workout_tracker.dto.SplitResponseDTO;
 import com.zorinserver.workout_tracker.entity.Split;
 import com.zorinserver.workout_tracker.entity.User;
 import com.zorinserver.workout_tracker.repository.UserRepository;
@@ -39,6 +40,11 @@ public class SplitController {
     @GetMapping("/{id}")
     public ResponseEntity<Split> getSplitById(@PathVariable Long id) {
         return ResponseEntity.ok(splitService.getSplitById(id));
+    }
+
+    @GetMapping("/userId/{userId}")
+    public List<SplitResponseDTO> getSplitsByUserId(@PathVariable Long userId) {
+        return splitService.getSplitsByUserId(userId);
     }
 
     @PostMapping

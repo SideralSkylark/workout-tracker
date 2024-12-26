@@ -35,29 +35,8 @@ export class DashboardComponent implements OnInit {
     this.isLoading = true;
 
     try {
-      // Load from local storage or cache
-      this.userName = localStorage.getItem('username') || '';
-      this.userId = parseInt(localStorage.getItem('user_id') || '0', 10) || null;
-      const cachedSplits = localStorage.getItem('splits');
-      this.splits = cachedSplits ? JSON.parse(cachedSplits) : [];
-
-      if (this.splits.length > 0) {
-        const selectedSplitId = this.splits[0].id;
-
-        const [logsExist, weeklyLogs] = await Promise.all([
-          this.checkIfLogsExistForToday(),
-          this.loadWeeklyLogs(selectedSplitId),
-        ]);
-
-        this.workoutLogged = logsExist;
-        this.recentActivity = this.getRecentActivity(weeklyLogs);
-
-        await this.loadNextWorkout(selectedSplitId);
-
-        this.weeklyProgress = this.calculateWeeklyProgress(weeklyLogs);
-      } else {
-        console.warn('No splits found in cache.');
-      }
+      this.initializeUserDetails();
+      this.loadDashboardData();
     } catch (error) {
       this.handleError('Error loading dashboard', error);
     } finally {
@@ -65,18 +44,46 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  private async loadWorkoutSplits(): Promise<any[]> {
-    return lastValueFrom(this.workoutService.getWorkoutSplits());
+  private initializeUserDetails(): void {
+    this.userName = localStorage.getItem('username') || '';
+    this.userId = parseInt(localStorage.getItem('user_id') || '0', 10) || null;
+    const cachedSplits = localStorage.getItem('splits');
+    this.splits = cachedSplits ? JSON.parse(cachedSplits) : [];
   }
 
-  private async loadWeeklyLogs(splitId?: number): Promise<any[]> {
+  private async loadDashboardData(): Promise<void> {
+    if (this.splits.length > 0) {
+      const selectedSplitId = this.splits[0].id;
+
+      const [logsExist, weeklyLogs] = await Promise.all([
+        this.checkIfLogsExistForToday(),
+        this.loadWeeklyLogs(selectedSplitId),
+      ]);
+
+      this.workoutLogged = logsExist;
+      this.recentActivity = this.getRecentActivity(weeklyLogs);
+
+      await this.loadNextWorkout(selectedSplitId);
+
+      this.weeklyProgress = this.calculateWeeklyProgress(weeklyLogs);
+    } else {
+      console.warn('No splits found in cache.');
+    }
+  }
+
+  private async loadWorkoutSplits(user_id: number): Promise<any[]> {
+    return lastValueFrom(this.workoutService.getSplitsByUserId(user_id));
+  }
+
+  private async loadWeeklyLogs(splitId: number): Promise<any[]> {
     return lastValueFrom(this.logService.getLogsForCurrentWeek(splitId));
   }
 
   private async checkIfLogsExistForToday(): Promise<boolean> {
     const todayDate = new Date().toISOString().split('T')[0];
+    const split_id = this.splits[0].id;
     try {
-      return await lastValueFrom(this.logService.checkLogsForDate(todayDate));
+      return await lastValueFrom(this.logService.checkLogsForDateAndSplit(todayDate, split_id));
     } catch (error) {
       console.error('Error checking logs for today:', error);
       return false;
@@ -88,14 +95,27 @@ export class DashboardComponent implements OnInit {
       const days: any[] = await lastValueFrom(this.getWorkoutDays(splitId));
       const todayId = this.getTodayId();
       const sortedDays = days.sort((a: any, b: any) => a.id - b.id);
-
+  
       this.daysToWorkout = sortedDays;
-      this.nextWorkout = sortedDays.find((day: any) => day.id === todayId) || null;
-      this.isWorkoutToday = Boolean(this.nextWorkout);
+  
+      if (this.workoutLogged) {
+        // If a workout is logged today, find the next workout day
+        const nextDayIndex = sortedDays.findIndex((day) => day.id > todayId);
+        this.nextWorkout =
+          nextDayIndex !== -1
+            ? sortedDays[nextDayIndex]
+            : sortedDays[0]; // Loop back to the first day if none found
+      } else {
+        // If no workout logged, set today's workout if applicable
+        this.nextWorkout = sortedDays.find((day: any) => day.id === todayId) || null;
+      }
+  
+      this.isWorkoutToday =
+        this.nextWorkout && this.nextWorkout.id === todayId && !this.workoutLogged;
     } catch (error) {
       this.handleError('Error fetching workout days', error);
     }
-  }
+  }  
 
   private getWorkoutDays(splitId: number): Observable<any> {
     return this.dayService.getDaysWithWorkouts(splitId);
@@ -104,10 +124,7 @@ export class DashboardComponent implements OnInit {
   private getRecentActivity(logs: any[]): any[] {
     return logs
       .filter((log) => log.workoutDate)
-      .sort(
-        (a, b) =>
-          new Date(b.workoutDate).getTime() - new Date(a.workoutDate).getTime()
-      )
+      .sort((a, b) => new Date(b.workoutDate).getTime() - new Date(a.workoutDate).getTime())
       .slice(0, 5);
   }
 
@@ -122,19 +139,13 @@ export class DashboardComponent implements OnInit {
   }
 
   private filterDaysWorked(logs: any[]): string[] {
-    const uniqueDates = new Set<string>();
-
-    logs.forEach((log) => {
-      const date = log.workoutDate.split('T')[0];
-      uniqueDates.add(date);
-    });
-
+    const uniqueDates = new Set(logs.map((log) => log.workoutDate.split('T')[0]));
     return Array.from(uniqueDates);
   }
 
   private getTodayId(): number {
     const today = new Date().getDay();
-    return today === 0 ? 7 : today; // Sunday as 7
+    return today === 0 ? 7 : today; 
   }
 
   private handleError(message: string, error: any): void {

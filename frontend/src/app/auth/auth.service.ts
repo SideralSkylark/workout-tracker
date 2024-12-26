@@ -19,7 +19,6 @@ export class AuthService {
   }
 
   storeToken(token: string) {
-    console.log('Storing token:', token);
     localStorage.setItem('jwt', token);
   }
 
@@ -31,7 +30,6 @@ export class AuthService {
 
   getToken() {
     const token = localStorage.getItem('jwt');
-    console.log('Retrieved token:', token);
     return token;
   }
 

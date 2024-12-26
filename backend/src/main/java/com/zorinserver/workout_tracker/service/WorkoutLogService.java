@@ -45,6 +45,10 @@ public class WorkoutLogService {
         return workoutLogRepository.existsByWorkoutDate(date);
     }
 
+    public boolean logsExistForDateAndSplit(LocalDate date, Long splitId) {
+        return workoutLogRepository.existsByWorkoutDateAndSplitId(date, splitId);
+    }    
+
     public List<LogByIdDTO> getLogsForDateRange(LocalDate startDate, LocalDate endDate) {
         return workoutLogRepository.findByWorkoutDateBetween(startDate, endDate)
                 .stream()

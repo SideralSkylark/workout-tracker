@@ -4,7 +4,7 @@ import { ExerciseService } from '../services/exercise.service';
 import { DayService } from '../services/day.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import * as bootstrap from 'bootstrap';
 
 @Component({
@@ -30,109 +30,127 @@ export class WorkoutSplitComponent {
   currentSplitId: number = 0;
   isLoading: boolean = true;
 
+  private userId: number | null = null;
+
   constructor(
     private workoutService: WorkoutService,
     private exerciseService: ExerciseService,
     private dayService: DayService
   ) {}
 
-  ngOnInit(): void {
-    this.loadSplitsAndDays();
-  }
-
-  loadSplitsAndDays(): void {
+  async ngOnInit(): Promise<void> {
     this.isLoading = true;
-
-    forkJoin([this.workoutService.getWorkoutSplits(), this.dayService.getDays()])
-      .subscribe({
-        next: ([splits, days]) => {
-          this.splits = splits;
-          this.days = days;
-
-          if (this.splits.length > 0) {
-            this.currentSplitId = this.splits[0].id;
-            this.loadExercises(this.currentSplitId);
-          }
-        },
-        error: (error) => {
-          console.error('Error loading splits or days', error);
-        },
-        complete: () => {
-          this.isLoading = false;
-        },
-      });
-  }
-
-  createSplit(): void {
-    if (this.newSplitName.trim()) {
-      const user_id = localStorage.getItem('user_id') || '';
-      const splitData = { user_id: user_id, name: this.newSplitName };
-
-      this.workoutService.createSplit(splitData).subscribe(() => {
-        this.newSplitName = '';
-        this.loadSplitsAndDays();
-      });
+    try {
+      this.initializeUserDetails();
+      await this.loadSplitsAndDays();
+    } catch (error) {
+      console.error('Error initializing component:', error);
+    } finally {
+      this.isLoading = false;
     }
   }
 
-  deleteSplit(splitId: number): void {
-    this.workoutService.deleteSplit(splitId).subscribe(() => {
-      this.loadSplitsAndDays();
-    });
+  private initializeUserDetails(): void {
+    this.userId = parseInt(localStorage.getItem('user_id') || '0', 10) || null;
   }
 
-  // Exercise Management
-  loadExercises(splitId: number): void {
+  private async loadSplitsAndDays(): Promise<void> {
+    if (!this.userId) return;
+
+    try {
+      this.splits = await this.loadWorkoutSplits(this.userId);
+      this.days = await this.loadDays();
+
+      if (this.splits.length > 0) {
+        this.currentSplitId = this.splits[0].id;
+        await this.loadExercises(this.currentSplitId);
+      }
+    } catch (error) {
+      console.error('Error loading splits or days:', error);
+    }
+  }
+
+  private async loadWorkoutSplits(userId: number): Promise<any[]> {
+    return lastValueFrom(this.workoutService.getSplitsByUserId(userId));
+  }
+
+  private async loadDays(): Promise<any[]> {
+    return lastValueFrom(this.dayService.getDays());
+  }
+
+  async loadExercises(splitId: number): Promise<void> {
     this.isLoading = true;
     this.daysToExercise = [];
 
-    const exerciseRequests = this.days.map((day) =>
-      this.exerciseService.getExercisesByDayAndSplit(day.id, splitId)
-    );
+    try {
+      const exerciseRequests = this.days.map((day) =>
+        lastValueFrom(this.exerciseService.getExercisesByDayAndSplit(day.id, splitId))
+      );
+      const results = await Promise.all(exerciseRequests);
 
-    forkJoin(exerciseRequests).subscribe({
-      next: (results) => {
-        results.forEach((exercises, index) => {
-          const day = this.days[index];
-
-          if (exercises.length > 0) {
-            this.daysToExercise.push({
-              day: day.name,
-              exercises: exercises.map((exercise) => ({
-                id: exercise.id,
-                exerciseName: exercise.exerciseName,
-                sets: exercise.sets,
-                reps: exercise.reps,
-              })),
-            });
-          }
-        });
-      },
-      error: (error) => {
-        console.error('Error loading exercises:', error);
-      },
-      complete: () => {
-        this.isLoading = false;
-      },
-    });
+      results.forEach((exercises, index) => {
+        const day = this.days[index];
+        if (exercises.length > 0) {
+          this.daysToExercise.push({
+            day: day.name,
+            exercises: exercises.map((exercise) => ({
+              id: exercise.id,
+              exerciseName: exercise.exerciseName,
+              sets: exercise.sets,
+              reps: exercise.reps,
+            })),
+          });
+        }
+      });
+    } catch (error) {
+      console.error('Error loading exercises:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
-  addExercise(): void {
-    const exerciseData = this.newExercise;
+  async createSplit(): Promise<void> {
+    if (this.newSplitName.trim() && this.userId) {
+      const splitData = { user_id: this.userId, name: this.newSplitName };
 
-    this.exerciseService.addExercise(exerciseData).subscribe(() => {
-      this.loadExercises(this.currentSplitId);
+      try {
+        await lastValueFrom(this.workoutService.createSplit(splitData));
+        this.newSplitName = '';
+        await this.loadSplitsAndDays();
+      } catch (error) {
+        console.error('Error creating split:', error);
+      }
+    }
+  }
+
+  async deleteSplit(splitId: number): Promise<void> {
+    try {
+      await lastValueFrom(this.workoutService.deleteSplit(splitId));
+      await this.loadSplitsAndDays();
+    } catch (error) {
+      console.error('Error deleting split:', error);
+    }
+  }
+
+  async addExercise(): Promise<void> {
+    try {
+      await lastValueFrom(this.exerciseService.addExercise(this.newExercise));
+      await this.loadExercises(this.currentSplitId);
       this.resetExerciseForm();
-    });
+    } catch (error) {
+      console.error('Error adding exercise:', error);
+    }
   }
 
-  deleteExercise(exerciseId: number): void {
-    this.exerciseService.deleteExercise(exerciseId).subscribe(() => {
-      this.loadExercises(this.currentSplitId);
-    });
+  async deleteExercise(exerciseId: number): Promise<void> {
+    try {
+      await lastValueFrom(this.exerciseService.deleteExercise(exerciseId));
+      await this.loadExercises(this.currentSplitId);
+    } catch (error) {
+      console.error('Error deleting exercise:', error);
+    }
   }
 
-  // Utility Methods
   openExerciseModal(): void {
     this.newExercise.splitId = this.currentSplitId;
 

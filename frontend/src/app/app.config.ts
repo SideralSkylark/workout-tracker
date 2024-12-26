@@ -18,5 +18,3 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
   ],
 };
-
-console.log('AuthInterceptor registered in providers');

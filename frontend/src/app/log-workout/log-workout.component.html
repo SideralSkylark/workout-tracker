@@ -1,44 +1,50 @@
 <div class="container text-light mt-4">
+  <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold fs-3">Log Today's Workout</h2>
   </div>
   <hr />
 
+  <!-- Loading Indicator -->
   <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center" style="height: 50vh;">
     <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 
+  <!-- Workout Already Logged -->
   <div *ngIf="logsExist; else workoutContent" class="card bg-dark mb-4 shadow-sm text-light">
     <div class="card-body">
-      <h5 class="card-title mb3">Workout already logged for today!</h5>
+      <h5 class="card-title mb-3">Workout Already Logged for Today!</h5>
       <p class="card-text">You can view your logs or relax for the rest of the day.</p>
-    <div>
-      <button
-      class="btn btn-outline-light mt-4 w-100 py-2"
-      routerLink="/progress" >
-      <i class="bi bi-clock-history me-2"></i>
-      Logs
-    </button>
-    </div>
+      <button class="btn btn-outline-light mt-4 w-100 py-2" routerLink="/progress">
+        <i class="bi bi-clock-history me-2"></i> Logs
+      </button>
     </div>
   </div>
 
+  <!-- Workout Content -->
   <ng-template #workoutContent>
+    <!-- If Exercises Exist -->
     <div *ngIf="exercises.length > 0; else noWorkout" class="mt-4">
       <form (ngSubmit)="onSubmit()">
-        <div class="card bg-dark mb-4 shadow-sm text-light" *ngFor="let exercise of exercises; let i = index">
+        <!-- Exercise Cards -->
+        <div
+          class="card bg-dark mb-4 shadow-sm text-light"
+          *ngFor="let exercise of exercises; let i = index"
+        >
           <div class="card-body">
             <h5 class="card-title mb-3">{{ exercise.name }}</h5>
             <p class="card-text">
-              Planned: <strong>{{ exercise.sets }}</strong> sets of <strong>{{ exercise.reps }}</strong> reps per set
+              Planned: <strong>{{ exercise.sets }}</strong> sets of
+              <strong>{{ exercise.reps }}</strong> reps per set
             </p>
             <hr />
 
+            <!-- Sets Input -->
             <div class="mb-3" *ngFor="let set of [].constructor(exercise.sets); let setIndex = index">
               <label for="reps-{{ i }}-{{ setIndex }}" class="form-label d-block">
-                <span>Set {{ setIndex + 1 }} Reps Completed</span>
+                Set {{ setIndex + 1 }} Reps Completed
               </label>
               <div class="input-group">
                 <input
@@ -56,13 +62,14 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 py-2 mt-3 shadow-sm submit-btn">
-          <i class="bi bi-check-circle"></i>
-          Log Workout
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary w-100 py-2 mt-3 shadow-sm">
+          <i class="bi bi-check-circle"></i> Log Workout
         </button>
       </form>
     </div>
 
+    <!-- No Workouts Scheduled -->
     <ng-template #noWorkout>
       <div class="alert alert-warning text-center py-4 shadow-sm mt-5">
         <strong>No workouts scheduled for today!</strong>

@@ -34,10 +34,11 @@ public class WorkoutLogController {
     }
 
     @GetMapping("/logs-exist")
-    public ResponseEntity<Boolean> checkLogsForDate(
-        @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    public ResponseEntity<Boolean> checkLogsForDateAndSplit(
+        @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+        @RequestParam("splitId") Long splitId
     ) {
-        boolean logsExist = workoutLogService.logsExistForDate(date);
+        boolean logsExist = workoutLogService.logsExistForDateAndSplit(date, splitId);
         return ResponseEntity.ok(logsExist);
     }
 

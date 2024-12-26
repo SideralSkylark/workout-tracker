@@ -1,47 +1,52 @@
 <div class="container text-light mt-4">
+  <!-- Header Section -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold fs-3">Workout Split</h2>
     <p class="text-secondary fs-6">
       Plan and organize your workouts effectively by defining splits and exercises.
     </p>
   </div>
-  <hr />
+  <hr class="border-secondary" />
 
-  <div *ngIf="isLoading" class="d-flex justify-content-center mt-5">
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center mt-5">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 
+  <!-- Workout Splits -->
   <div *ngIf="splits.length > 0; else noSplits">
     <h3 class="fw-semibold fs-4 mb-3 mt-4">Your Workout Split</h3>
     <div class="row">
       <div class="col-md-100 mb-3" *ngFor="let split of splits">
         <div class="card bg-dark shadow-sm">
           <div class="card-body">
-            <h5 class="card-title text-uppercase white-text">{{ split.name }}</h5>
+            <h5 class="card-title text-uppercase text-light">{{ split.name }}</h5>
             <button
-              class="btn btn-danger btn-sm w-100 mt-2 py-2"
+              class="btn btn-danger btn-sm w-100 mt-3 py-2"
               (click)="deleteSplit(split.id)"
+              title="Delete this split"
             >
-              <i class="bi bi-trash me-2"></i>Delete Split
+              <i class="bi bi-trash me-2"></i> Delete Split
             </button>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Exercises by Day -->
     <div *ngIf="daysToExercise.length > 0; else noExercises" class="mt-4">
       <h3 class="fw-semibold fs-4 mb-3">Exercises by Day</h3>
       <div class="row">
         <div class="col-md-6 mb-3" *ngFor="let entry of daysToExercise">
-          <div class="card bg-dark shadow-sm">
+          <div class="card bg-dark shadow-sm border-light">
             <div class="card-body">
-              <h5 class="card-title text-uppercase white-text">{{ entry.day }}</h5>
+              <h5 class="card-title text-uppercase text-light">{{ entry.day }}</h5>
               <ul class="list-group list-group-flush mt-3">
                 <li
                   *ngFor="let exercise of entry.exercises"
-                  class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center"
+                  class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-light"
                 >
                   <div>
                     <strong>{{ exercise.exerciseName }}</strong>
@@ -49,12 +54,14 @@
                     {{ exercise.sets }} sets of {{ exercise.reps }} reps
                   </div>
                   <button 
-                  class="btn btn-danger btn-sm"
-                  (click)="deleteExercise(exercise.id)">
-                  <i class="bi bi-trash"></i>
+                    class="btn btn-danger btn-sm"
+                    (click)="deleteExercise(exercise.id)"
+                    title="Delete this exercise"
+                  >
+                    <i class="bi bi-trash"></i>
                   </button>
                 </li>
-              </ul>              
+              </ul>
             </div>
           </div>
         </div>
@@ -62,9 +69,11 @@
     </div>
   </div>
 
+  <!-- No Splits Template -->
   <ng-template #noSplits>
     <div class="alert alert-warning text-center mt-4">
-      <p>No workout splits available. Start by adding one below!</p>
+      <i class="bi bi-exclamation-circle text-warning fs-4"></i>
+      <p class="mt-2">No workout splits available. Start by adding one below!</p>
       <div class="input-group">
         <input
           type="text"
@@ -79,14 +88,17 @@
     </div>
   </ng-template>
 
+  <!-- No Exercises Template -->
   <ng-template #noExercises>
     <div class="alert alert-warning text-center mt-4">
-      <p>No exercises found. Use the floating button to add some!</p>
+      <i class="bi bi-list-task text-warning fs-4"></i>
+      <p class="mt-2">No exercises found. Use the floating button to add some!</p>
     </div>
   </ng-template>
 
+  <!-- Floating Add Exercise Button -->
   <button
-    class="btn btn-primary rounded-circle position-fixed shadow white-text"
+    class="btn btn-primary rounded-circle position-fixed shadow"
     style="bottom: 20px; right: 20px; width: 60px; height: 60px; font-size: 24px;"
     (click)="openExerciseModal()"
     title="Add Exercise"
@@ -94,7 +106,7 @@
     <i class="bi bi-plus"></i>
   </button>
 
-
+  <!-- Add Exercise Modal -->
   <div
     class="modal fade"
     id="addExerciseModal"
