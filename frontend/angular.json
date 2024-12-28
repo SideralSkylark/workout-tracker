@@ -95,11 +95,13 @@
               }
             ],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "src/styles.css"
+              "src/styles.css",
+              "assets/bootstrap/css/bootstrap.min.css",
+              "assets/bootstrap/bootstrap-icons-1.11.3/font/bootstrap-icons.css"
             ],
             "scripts": [
-              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+              "assets/bootstrap/js/bootstrap.bundle.js",
+              "assets/bootstrap/js/bootstrap.bundle.min.js"
             ]
           }
         }
