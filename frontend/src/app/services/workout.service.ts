@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class WorkoutService {
-  private apiBaseUrl = 'http://localhost:8080/api';
+  private apiBaseUrl = '/api';
 
   constructor(private http: HttpClient) { }
 
