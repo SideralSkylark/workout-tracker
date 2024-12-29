@@ -1,59 +1,80 @@
-# Workout tracker spring boot app
-This app is designed to help track progress in the gym, for the time beign it will simply allow you to devise a split and register the work done each session. This project comes from a need of mine to keep track of such metrics in a way of avoiding the use of pen and paper, for it becomes far too taxing to keep track of such data using it.
+# Workout Tracker Spring Boot App
 
-I have yet to write unit tests for this project, but i have to drop it for the time being, for i have spent too much time already in this one project.
+This app is designed to help users track their progress in the gym. Currently, it allows you to devise a workout split and register the work completed during each session. This project stems from my personal need for a digital solution to track such metrics, as using pen and paper proved too cumbersome and impractical.
 
-## Functional requirements
-- **Create a split**;
-- **Define workouts for the split**;
-- **Log your workouts**;
-- **Track your progress**;
+While I have yet to write unit tests for this project, I must set it aside for now due to the significant time already invested.
 
-## Bugs and problems
-- The user can't login if his token from a previous login is still in memory;
-- The login method returns the user credentials as a response in the splits key of the json;
+---
+
+## Functional Requirements
+- **Create a split:** Define workout splits according to your needs.
+- **Define workouts for the split:** Assign exercises to each split.
+- **Log your workouts:** Record completed sets and reps for each session.
+- **Track your progress:** Monitor your performance over time.
+
+---
+
+## Bugs and Issues
+- Users cannot log in if a token from a previous login is still in memory.
+- The login method erroneously returns user credentials in the `splits` key of the JSON response.
+
+---
 
 ## Instructions
-1. To run the app i recoment using docker, simply installing docker, node and angular cli should be enough.
-2. run: 
-    ```
+
+### Prerequisites
+Ensure you have the following installed:
+- Docker
+- Node.js
+- Angular CLI
+
+### Steps
+1. Navigate to the `/frontend` directory and run:
+    ```bash
     npm install
     ```
-   on the /frontend directory.
-3. run:
-    ```
+
+2. Globally install the Angular CLI:
+    ```bash
     npm install -g @angular/cli
     ```
-4. on the /frontend directory run:
-    ```
+
+3. In the `/frontend` directory, build the Angular app by running:
+    ```bash
     ng build
     ```
-    To build the angular app onto /dist.
-5. create a .env file at the root of the project
-    ```
+    This will compile the Angular app into the `/dist` directory.
+
+4. Create a `.env` file at the root of the project with the following content:
+    ```env
     DB_URL=jdbc:postgresql://postgres-db:5432/workout_db
     DB_USERNAME=your_db_username
     DB_PASSWORD=your_db_password
     ```
-6. run the compose file from the root directory with the command:
-    ```
+
+5. From the root directory, build the Docker containers by running:
+    ```bash
     docker compose build
     ```
-7. finaly run:
-    ```
+
+6. Start the app in detached mode:
+    ```bash
     docker compose up -d
     ```
 
-The app should be avaliable on:
-```
-http://localhost
-```
+7. The app should now be available at:
+    ```
+    http://localhost
+    ```
 
-## Tecnologies used
-- Java 23
-- spring boot
-- angular
-- bootstrap
-- postgre db
-- nginx
-- docker
+---
+
+## Technologies Used
+- **Java 23**
+- **Spring Boot**
+- **Angular**
+- **Bootstrap**
+- **PostgreSQL**
+- **NGINX**
+- **Docker**
+
