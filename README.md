@@ -16,7 +16,8 @@ I have yet to write unit tests for this project, but i have to drop it for the t
 ## Instructions
 1. To run the app i recoment using docker, simply installing docker, node and angular cli should be enough.
 2. run: 
-    ```npm install
+    ```
+    npm install
     ```
    on the /frontend directory.
 3. run:
