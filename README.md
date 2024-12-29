@@ -1,7 +1,3 @@
-Here’s an improved and more organized version of the documentation:
-
----
-
 # Workout Tracker Spring Boot App
 
 This app is designed to help users track their progress in the gym. It allows you to create a workout split, register the work completed during each session, and monitor your progress over time. The project originated from a personal need for a digital solution to track workout metrics, as using pen and paper proved cumbersome and impractical.
