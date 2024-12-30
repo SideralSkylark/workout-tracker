@@ -107,6 +107,11 @@ Ensure you have the following installed:
 - **`nginx.conf`**: Configures NGINX as a reverse proxy to forward requests to the backend service, using Docker Compose’s DNS service rather than IP addresses for endpoint calls.
 - **`docker-compose.yml`**: Defines all the containers required to run the application.
 
+### Diagrams
+
+#### Class diagram
+![Class_diagram_workoutTracker](diagrams/Class_diagram.png)
+
 ---
 
 ## Future Roadmap
