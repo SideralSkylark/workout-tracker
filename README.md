@@ -131,7 +131,3 @@ Ensure you have the following installed:
 - **PostgreSQL**
 - **NGINX**
 - **Docker**
-
---- 
-
-This version is more organized, with clear section breaks and concise explanations. It should be easier to follow and understand.
